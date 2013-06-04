@@ -8,6 +8,7 @@ import string
 import signal
 import sys
 import sqlite3
+import ipaddr
 
 def parse(xml):
 	l = []
@@ -82,19 +83,28 @@ while True:
 				#print "Executing cursor"
 				#print('SELECT * FROM export WHERE ASN = %s AND IP_PREFIX = %s/%s'% (i["origin_as"],j["address"],j["len"]))
 				#quit()
-				cursor.execute("SELECT * FROM export WHERE ASN = '%s' AND IP_PREFIX = '%s/%s'" % (i["origin_as"],j["address"],j["len"]))
+				if j["address"].endswith("::"):
+					binary = bin(ipaddr.IPv6Network(j["address"]).network)[2:]
+				else:
+					binary = bin(ipaddr.IPv4Network(j["address"]).network)[2:]
+				cursor.execute("SELECT * FROM export WHERE Binary LIKE '%s%%'" % (binary)[:int(j["len"])])
 				#print "Fetching from cursor"
 				result = cursor.fetchall()
 				if result != []:
 					#print "Result is not null"
 					#print result
 					for x in result:
-						print x
+						print "========Begin Match========"
+						print "Message:\t" + i["origin_as"] + "\t" + j["address"] + "\t" + j["len"] + "\t" + binary[:int(j["len"])]
+						print "Database:\t" + x[0] + "\t" + x[1] + "\t" + x[2] + "\t" + x[3] + "\t"
+						print "========End Match========"
+						break
 						if j["len"] <= x[2]:
 							print i["origin_as"] + "\t" + j["address"] + "\t" + j["len"] + "\tValid"
 						else:
 							print i["origin_as"] + "\t" + j["address"] + "\t" + j["len"] + "\tInvalid-B"
 				else:
+					break
 					cursor.execute("SELECT * FROM export WHERE ASN = '%s' OR IP_PREFIX = '%s/%s'"% (i["origin_as"],j["address"],j["len"]))
 					result = cursor.fetchall()
 					if result != []:
