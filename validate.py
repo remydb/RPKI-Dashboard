@@ -7,7 +7,7 @@ import xml.dom.minidom as dom
 import string
 import signal
 import sys
-import sqlite3
+import MySQLdb as mdb
 import ipaddr
 
 def parse(xml):
@@ -60,8 +60,10 @@ def parse(xml):
 #     	for j in i["prefix"]:
 #     		print i["origin_as"] + "\t" + j["address"] + "\t" + j["len"]
 
-connection=sqlite3.connect("validated.db")
+connection=mdb.connect('localhost', 'root', 'noedelsoep', 'bgp')
 cursor=connection.cursor()
+cursor.execute("SELECT * FROM export")
+result = cursor.fetchall()
 
 cli = socket( AF_INET ,SOCK_STREAM)
 cli.connect(("livebgp.netsec.colostate.edu", 50001))
@@ -80,37 +82,76 @@ while True:
 		msg = ''.join(l[1:])
 		for i in d:
 			for j in i["prefix"]:
-				#print "Executing cursor"
-				#print('SELECT * FROM export WHERE ASN = %s AND IP_PREFIX = %s/%s'% (i["origin_as"],j["address"],j["len"]))
-				#quit()
 				if j["address"].endswith("::"):
-					binary = bin(ipaddr.IPv6Network(j["address"]).network)[2:]
+					intbin = long(bin(ipaddr.IPv6Network(j["address"]).network)[2:])
+					strbin = "%0128d" % (intbin)
 				else:
-					binary = bin(ipaddr.IPv4Network(j["address"]).network)[2:]
-				cursor.execute("SELECT * FROM export WHERE Binary LIKE '%s%%'" % (binary)[:int(j["len"])])
-				#print "Fetching from cursor"
-				result = cursor.fetchall()
-				if result != []:
-					#print "Result is not null"
-					#print result
-					for x in result:
-						print "========Begin Match========"
-						print "Message:\t" + i["origin_as"] + "\t" + j["address"] + "\t" + j["len"] + "\t" + binary[:int(j["len"])]
-						print "Database:\t" + x[0] + "\t" + x[1] + "\t" + x[2] + "\t" + x[3] + "\t"
-						print "========End Match========"
-						break
-						if j["len"] <= x[2]:
-							print i["origin_as"] + "\t" + j["address"] + "\t" + j["len"] + "\tValid"
-						else:
-							print i["origin_as"] + "\t" + j["address"] + "\t" + j["len"] + "\tInvalid-B"
-				else:
-					break
-					cursor.execute("SELECT * FROM export WHERE ASN = '%s' OR IP_PREFIX = '%s/%s'"% (i["origin_as"],j["address"],j["len"]))
-					result = cursor.fetchall()
-					if result != []:
-						print i["origin_as"] + "\t" + j["address"] + "\t" + j["len"] + "\tUwotm8?"
-					else:
-						print i["origin_as"] + "\t" + j["address"] + "\t" + j["len"] + "\tUnknown"
+					intbin = int(bin(ipaddr.IPv4Network(j["address"]).network)[2:])
+					strbin = "%032d" % (intbin)
+				cursor.execute("""SELECT c.code FROM ip2nationCountries c, ip2nation i 
+					WHERE i.ip < INET_ATON('%s') 
+	            	AND c.code = i.country ORDER BY i.ip DESC LIMIT 0,1""" % (j["address"]))
+				country = cursor.fetchone()
+				valid=0
+				for x in result:
+					if x[3] == strbin[:len(x[3])]:
+						if x[0][2:] == i["origin_as"] and j["len"] >= x[1].split("/")[1] and j["len"] <= x[2]:
+							valid=1
+							cursor.execute("""INSERT INTO announcements (ASN, IP_Prefix, Validity, Country) VALUES ('%s', '%s/%s', 'V', '%s') ON DUPLICATE KEY UPDATE Validity='V', Country='%s';""" % (i["origin_as"], j["address"], j["len"], country[0], country[0]))
+							# print "Message:\t" + i["origin_as"] + "/" + x[0][2:] + "\t" + \
+							# j["address"] + "/" + x[1].split("/")[0] + "\t" + \
+							# j["len"] + "/" + x[1].split("/")[1] + "-" + x[2] + "\tValid"
+							break
+
+						elif (x[0][2:] != i["origin_as"]) and (j["len"] < x[1].split("/")[1] or j["len"] > x[2]):
+							# print "Message:\t" + i["origin_as"] + "/" + x[0][2:] + "\t" + \
+							# j["address"] + "/" + x[1].split("/")[0] + "\t" + \
+							# j["len"] + "/" + x[1].split("/")[1] + "-" + x[2] + "\tInvalid prefix+AS"
+							valid=5
+
+						elif x[0][2:] != i["origin_as"]:
+						 	# print "Message:\t" + i["origin_as"] + "/" + x[0][2:] + "\t" + \
+						 	# j["address"] + "/" + x[1].split("/")[0] + "\t" + \
+						 	# j["len"] + "/" + x[1].split("/")[1] + "-" + x[2] + "\tInvalid AS"
+						 	valid=6
+
+						elif j["len"] < x[1].split("/")[1] or j["len"] > x[2]:
+							# print "Message:\t" + i["origin_as"] + "/" + x[0][2:] + "\t" + \
+							# j["address"] + "/" + x[1].split("/")[0] + "\t" + \
+							# j["len"] + "/" + x[1].split("/")[1] + "-" + x[2] + "\tInvalid prefix"
+							valid=7
+
+				if valid == 0:
+					cursor.execute("""INSERT INTO announcements (ASN, IP_Prefix, Validity, Country) VALUES ('%s', '%s/%s', 'U', '%s') ON DUPLICATE KEY UPDATE Validity='U', Country='%s';""" % (i["origin_as"], j["address"], j["len"], country[0], country[0]))
+				elif valid == 5:
+					cursor.execute("""INSERT INTO announcements (ASN, IP_Prefix, Validity, Country) VALUES ('%s', '%s/%s', 'IB', '%s') ON DUPLICATE KEY UPDATE Validity='IB', Country='%s';""" % (i["origin_as"], j["address"], j["len"], country[0], country[0]))
+				elif valid == 6:
+					cursor.execute("""INSERT INTO announcements (ASN, IP_Prefix, Validity, Country) VALUES ('%s', '%s/%s', 'IA', '%s') ON DUPLICATE KEY UPDATE Validity='IA', Country='%s';""" % (i["origin_as"], j["address"], j["len"], country[0], country[0]))
+				elif valid == 7:
+					cursor.execute("""INSERT INTO announcements (ASN, IP_Prefix, Validity, Country) VALUES ('%s', '%s/%s', 'IP', '%s') ON DUPLICATE KEY UPDATE Validity='IP', Country='%s';""" % (i["origin_as"], j["address"], j["len"], country[0], country[0]))
+				connection.commit()
+
+				# if result != []:
+				# 	#print "Result is not null"
+				# 	#print result
+				# 	for x in result:
+				# 		print "========Begin Match========"
+				# 		print "Message:\t" + i["origin_as"] + "\t" + j["address"] + "\t" + j["len"] + "\t" + binstr[:int(j["len"])]
+				# 		print "Database:\t" + x[0] + "\t" + x[1] + "\t" + x[2] + "\t" + x[3] + "\t"
+				# 		print "========End Match========"
+				# 		break
+				# 		if j["len"] <= x[2]:
+				# 			print i["origin_as"] + "\t" + j["address"] + "\t" + j["len"] + "\tValid"
+				# 		else:
+				# 			print i["origin_as"] + "\t" + j["address"] + "\t" + j["len"] + "\tInvalid-B"
+				# else:
+				# 	break
+				# 	cursor.execute("SELECT * FROM export WHERE ASN = '%s' OR IP_PREFIX = '%s/%s'"% (i["origin_as"],j["address"],j["len"]))
+				# 	result = cursor.fetchall()
+				# 	if result != []:
+				# 		print i["origin_as"] + "\t" + j["address"] + "\t" + j["len"] + "\tUwotm8?"
+				# 	else:
+				# 		print i["origin_as"] + "\t" + j["address"] + "\t" + j["len"] + "\tUnknown"
 
 
 				#print i["origin_as"] + "\t" + j["address"] + "\t" + j["len"]

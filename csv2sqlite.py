@@ -66,8 +66,21 @@ def main():
 
     filename = args[0]
 
-    print "DROP TABLE export;"
-    print "CREATE TABLE export (ASN, IP_Prefix, Max_Length, Binary, PRIMARY KEY (ASN, IP_Prefix, Max_Length));"
+    print "DROP DATABASE IF EXISTS bgp;"
+    print "CREATE DATABASE bgp;"
+    print "USE bgp;"
+    print """CREATE TABLE `export` ( 
+        ASN VARCHAR(20), 
+        IP_Prefix VARCHAR(70), 
+        Max_Length VARCHAR(128), 
+        bin VARCHAR(130), 
+        PRIMARY KEY (ASN, IP_Prefix, Max_Length));"""
+    print """CREATE TABLE `announcements` (
+	ASN VARCHAR(20),
+	IP_Prefix VARCHAR(70),
+	Validity VARCHAR(2),
+	Country VARCHAR(40),
+	PRIMARY KEY (ASN, IP_PREFIX));"""
     if filename == "-":
         if opts.table is None:
             print "ERROR: No table specified and stdin used."
@@ -95,7 +108,6 @@ def main():
 
         values = ", ".join(["\"%s\"" % x for x in row])
         print "INSERT INTO %s (%s) VALUES (%s);" % (table, fields, values)
-    print ".quit"
 
 if __name__ == "__main__":
     main()
