@@ -9,6 +9,7 @@ import signal
 import sys
 import MySQLdb as mdb
 import ipaddr
+import syslog
 
 def parse(xml):
 	l = []
@@ -52,15 +53,7 @@ def parse(xml):
 		l.append(d)
 	return l
 
-# with open(sys.argv[1], 'r') as content_file:
-#     content = content_file.read()
-#     d = parse(content)
-#     print "ASN \t Prefix \tLength"
-#     for i in d:
-#     	for j in i["prefix"]:
-#     		print i["origin_as"] + "\t" + j["address"] + "\t" + j["len"]
-
-connection=mdb.connect('localhost', 'root', 'noedelsoep', 'bgp')
+connection=mdb.connect('localhost', 'root', 'noedelsoep', 'bgp') #Don't worry, not a real password
 cursor=connection.cursor()
 cursor.execute("SELECT * FROM export")
 result = cursor.fetchall()
@@ -73,7 +66,7 @@ signal.signal(signal.SIGPIPE , signal.SIG_DFL)
 signal.signal(signal.SIGINT , signal.SIG_IGN)
 
 while True:
-	data = cli.recv(1024) #14= </BGP_MESSAGE >
+	data = cli.recv(1024)
 	if (re.search('</BGP_MESSAGE>', msg)):
 		l = msg.split('</BGP_MESSAGE>', 1)
 		bgp_update = l[0] + "</BGP_MESSAGE>"
@@ -97,62 +90,41 @@ while True:
 					if x[3] == strbin[:len(x[3])]:
 						if x[0][2:] == i["origin_as"] and j["len"] >= x[1].split("/")[1] and j["len"] <= x[2]:
 							valid=1
-							cursor.execute("""INSERT INTO announcements (ASN, IP_Prefix, Validity, Country) VALUES ('%s', '%s/%s', 'V', '%s') ON DUPLICATE KEY UPDATE Validity='V', Country='%s';""" % (i["origin_as"], j["address"], j["len"], country[0], country[0]))
-							# print "Message:\t" + i["origin_as"] + "/" + x[0][2:] + "\t" + \
-							# j["address"] + "/" + x[1].split("/")[0] + "\t" + \
-							# j["len"] + "/" + x[1].split("/")[1] + "-" + x[2] + "\tValid"
+							try:
+								cursor.execute("""INSERT INTO announcements (ASN, IP_Prefix, Validity, Country) VALUES ('%s', '%s/%s', 'V', '%s') ON DUPLICATE KEY UPDATE Validity='V', Country='%s';""" % (i["origin_as"], j["address"], j["len"], country[0], country[0]))
+							except:
+								syslog.syslog(syslog.LOG_WARNING, '[Validator] Inserting to MySQL table failed')
 							break
 
 						elif (x[0][2:] != i["origin_as"]) and (j["len"] < x[1].split("/")[1] or j["len"] > x[2]):
-							# print "Message:\t" + i["origin_as"] + "/" + x[0][2:] + "\t" + \
-							# j["address"] + "/" + x[1].split("/")[0] + "\t" + \
-							# j["len"] + "/" + x[1].split("/")[1] + "-" + x[2] + "\tInvalid prefix+AS"
 							valid=5
 
 						elif x[0][2:] != i["origin_as"]:
-						 	# print "Message:\t" + i["origin_as"] + "/" + x[0][2:] + "\t" + \
-						 	# j["address"] + "/" + x[1].split("/")[0] + "\t" + \
-						 	# j["len"] + "/" + x[1].split("/")[1] + "-" + x[2] + "\tInvalid AS"
 						 	valid=6
 
 						elif j["len"] < x[1].split("/")[1] or j["len"] > x[2]:
-							# print "Message:\t" + i["origin_as"] + "/" + x[0][2:] + "\t" + \
-							# j["address"] + "/" + x[1].split("/")[0] + "\t" + \
-							# j["len"] + "/" + x[1].split("/")[1] + "-" + x[2] + "\tInvalid prefix"
 							valid=7
 
 				if valid == 0:
-					cursor.execute("""INSERT INTO announcements (ASN, IP_Prefix, Validity, Country) VALUES ('%s', '%s/%s', 'U', '%s') ON DUPLICATE KEY UPDATE Validity='U', Country='%s';""" % (i["origin_as"], j["address"], j["len"], country[0], country[0]))
+					try:
+						cursor.execute("""INSERT INTO announcements (ASN, IP_Prefix, Validity, Country) VALUES ('%s', '%s/%s', 'U', '%s') ON DUPLICATE KEY UPDATE Validity='U', Country='%s';""" % (i["origin_as"], j["address"], j["len"], country[0], country[0]))
+					except:
+						syslog.syslog(syslog.LOG_WARNING, '[Validator] Inserting to MySQL table failed')
 				elif valid == 5:
-					cursor.execute("""INSERT INTO announcements (ASN, IP_Prefix, Validity, Country) VALUES ('%s', '%s/%s', 'IB', '%s') ON DUPLICATE KEY UPDATE Validity='IB', Country='%s';""" % (i["origin_as"], j["address"], j["len"], country[0], country[0]))
+					try:
+						cursor.execute("""INSERT INTO announcements (ASN, IP_Prefix, Validity, Country) VALUES ('%s', '%s/%s', 'IB', '%s') ON DUPLICATE KEY UPDATE Validity='IB', Country='%s';""" % (i["origin_as"], j["address"], j["len"], country[0], country[0]))
+					except:
+						syslog.syslog(syslog.LOG_WARNING, '[Validator] Inserting to MySQL table failed')
 				elif valid == 6:
-					cursor.execute("""INSERT INTO announcements (ASN, IP_Prefix, Validity, Country) VALUES ('%s', '%s/%s', 'IA', '%s') ON DUPLICATE KEY UPDATE Validity='IA', Country='%s';""" % (i["origin_as"], j["address"], j["len"], country[0], country[0]))
+					try:
+						cursor.execute("""INSERT INTO announcements (ASN, IP_Prefix, Validity, Country) VALUES ('%s', '%s/%s', 'IA', '%s') ON DUPLICATE KEY UPDATE Validity='IA', Country='%s';""" % (i["origin_as"], j["address"], j["len"], country[0], country[0]))
+					except:
+						syslog.syslog(syslog.LOG_WARNING, '[Validator] Inserting to MySQL table failed')
 				elif valid == 7:
-					cursor.execute("""INSERT INTO announcements (ASN, IP_Prefix, Validity, Country) VALUES ('%s', '%s/%s', 'IP', '%s') ON DUPLICATE KEY UPDATE Validity='IP', Country='%s';""" % (i["origin_as"], j["address"], j["len"], country[0], country[0]))
+					try:
+						cursor.execute("""INSERT INTO announcements (ASN, IP_Prefix, Validity, Country) VALUES ('%s', '%s/%s', 'IP', '%s') ON DUPLICATE KEY UPDATE Validity='IP', Country='%s';""" % (i["origin_as"], j["address"], j["len"], country[0], country[0]))
+					except:
+						syslog.syslog(syslog.LOG_WARNING, '[Validator] Inserting to MySQL table failed')
 				connection.commit()
 
-				# if result != []:
-				# 	#print "Result is not null"
-				# 	#print result
-				# 	for x in result:
-				# 		print "========Begin Match========"
-				# 		print "Message:\t" + i["origin_as"] + "\t" + j["address"] + "\t" + j["len"] + "\t" + binstr[:int(j["len"])]
-				# 		print "Database:\t" + x[0] + "\t" + x[1] + "\t" + x[2] + "\t" + x[3] + "\t"
-				# 		print "========End Match========"
-				# 		break
-				# 		if j["len"] <= x[2]:
-				# 			print i["origin_as"] + "\t" + j["address"] + "\t" + j["len"] + "\tValid"
-				# 		else:
-				# 			print i["origin_as"] + "\t" + j["address"] + "\t" + j["len"] + "\tInvalid-B"
-				# else:
-				# 	break
-				# 	cursor.execute("SELECT * FROM export WHERE ASN = '%s' OR IP_PREFIX = '%s/%s'"% (i["origin_as"],j["address"],j["len"]))
-				# 	result = cursor.fetchall()
-				# 	if result != []:
-				# 		print i["origin_as"] + "\t" + j["address"] + "\t" + j["len"] + "\tUwotm8?"
-				# 	else:
-				# 		print i["origin_as"] + "\t" + j["address"] + "\t" + j["len"] + "\tUnknown"
-
-
-				#print i["origin_as"] + "\t" + j["address"] + "\t" + j["len"]
 	msg += str(data)
