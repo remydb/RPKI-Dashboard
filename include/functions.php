@@ -249,7 +249,20 @@ function newgeochart($validity, $title, $chart){
           echo "Failed to connect to MySQL: (" . $mysqli->connect_errno . ") " . $mysqli->connect_error;
         }
 
-        $query = "SELECT `Country`, 
+	if ($validity=='V')
+  	{
+  	$colors = "['#fd2323', '#ed9200', '#e4d417', '#95c12d']";
+  	}
+       	else if ($validity=='U')
+  	{
+  	$colors = "['#95c12d', '#e4d417', '#ed9200', '#fd2323']";
+ 	}
+	else
+  	{
+  	$colors = "['#95c12d', '#e4d417', '#ed9200', '#fd2323']";
+ 	}
+ 
+	$query = "SELECT `Country`, 
             COUNT(`Country`) AS `occurrence` 
             FROM `".$GLOBALS['date']."` 
             WHERE Validity LIKE '$validity' 
@@ -275,10 +288,15 @@ function newgeochart($validity, $title, $chart){
 	print "google.setOnLoadCallback(draw$chart);
         function draw$chart() {
         var data = google.visualization.arrayToDataTable([
-          ['Country', 'Amount'],";
+          ['Country', 'Amount (%)'],";
         while ($row = $result->fetch_row())
         {
+        	if ($row[0] == 'uk'){
+        		echo "['gb', ".round(($row[1]/$data_array['uk']*100), 1)."],";
+        	}
+        	else{
         	echo "['".$row[0]."', ".round(($row[1]/$data_array[$row[0]]*100), 1)."],";
+        	}
         }
         $mysqli->close();
 
@@ -287,7 +305,7 @@ function newgeochart($validity, $title, $chart){
         // Create and draw the visualization.
         var options = {
         title: '$title',
-	colorAxis: {minValue: 0, maxValue: 100, colors:['red','yellow','green']}
+	colorAxis: {minValue: 0, maxValue: 100, colors:$colors}
         };
         
         var chart = new google.visualization.GeoChart(document.getElementById('$chart'));

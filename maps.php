@@ -30,7 +30,7 @@ newgeochart('U', 'Unknown routes per country', 'Chart3');
   =================================================== -->
   <header class="jumbotron subhead" id="overview">
   <div class="container">
-    <h1>RPKI dashboard</h1>
+    <h1>RPKI Dashboard</h1>
     <p class="lead">Stuffs</p>
   </div>
   </header>
