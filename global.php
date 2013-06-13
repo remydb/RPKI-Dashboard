@@ -2,6 +2,7 @@
 <?php
 require ('include/gChart.php');
 require ('include/functions.php');
+require ('include/messages.php')
 ?>
 <head>
 <title>RPKI Dashboard</title>
@@ -13,7 +14,7 @@ require ('include/functions.php');
 google.load('visualization', '1', {packages: ['corechart']});
 <?php
 newpichart('V','I%','U', 'Valid', 'Invalid', 'Unknown', 'Percentages of invalid traffic', 'Chart1');
-newpichart('IA', 'IP', 'IB', 'Invalid AS', 'Invalid Prefix', 'Both Invalid', 'Percentages of invalid traffic', 'Chart2'); 
+newpichart2('IA', 'IP', 'IB', 'V', 'Invalid AS', 'Invalid Prefix', 'Both Invalid', 'Valid', 'Percentages of invalid traffic', 'Chart2'); 
 ?>
 </script>
 </head>
@@ -49,13 +50,14 @@ newpichart('IA', 'IP', 'IB', 'Invalid AS', 'Invalid Prefix', 'Both Invalid', 'Pe
       <!-- Main content
       =============================================== -->
       <div class='span9 main'>
-        <!-- Pie chart
+	<!-- Pie chart
         ============================================= -->
         <section id="total">
           <div class="page-header">
-            <h1>Distribution of RPKI states</h1>
-          </div>
-          <div id="Chart1"></div>
+            	<h1>Distribution of RPKI states</h1>
+	</div>
+        <?php print "$message" ?>
+	<div id="Chart1"></div>
         </section>
 
         <!-- Per country
@@ -64,7 +66,8 @@ newpichart('IA', 'IP', 'IB', 'Invalid AS', 'Invalid Prefix', 'Both Invalid', 'Pe
           <div class="page-header">
             <h1>Distribution of invalids</h1>
           </div>
-          <div id="Chart2"></div>
+          <?php print "$message2" ?>
+	<div id="Chart2"></div>
         </section>
       </div>
     </div>

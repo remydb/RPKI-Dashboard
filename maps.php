@@ -2,6 +2,7 @@
 <?php
 require ('include/gChart.php');
 require ('include/functions.php');
+require ('include/messages.php');
 ?>
 <head>
 <title>RPKI Dashboard</title>
@@ -56,6 +57,7 @@ newgeochart('U', 'Unknown routes per country', 'Chart3');
         <section id="valid">
           <div class="page-header">
             <h1>Percent valid routes per country</h1>
+		<?php print "$location"?>
           </div>
           <div id="Chart1"></div>
         </section>

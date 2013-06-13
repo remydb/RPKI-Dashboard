@@ -2,7 +2,10 @@
 <?php
 require ('include/gChart.php');
 require ('include/functions.php');
-$asn = $_GET['asn'];
+require ('include/messages.php');
+if (isset($_GET['asn'])){
+  $asn = $_GET['asn'];
+}
 ?>
 <head>
 <title>RPKI Dashboard</title>
@@ -16,6 +19,7 @@ google.load('visualization', '1', {packages: ['corechart']});
 if (isset($asn)){
 newpichartperas($asn, 'V','I%','U', 'Valid', 'Invalid', 'Unknown', 'Percentages of invalid traffic', 'Chart1');
 newpichartperas($asn, 'IA', 'IP', 'IB', 'Invalid AS', 'Invalid Prefix', 'Both Invalid', 'Percentages of invalid traffic', 'Chart2'); 
+newlinechart('V', 'I%', 'Title', 'Chart3', $asn);
 }
 ?>
 </script>
@@ -56,25 +60,19 @@ location.href="peras.php?asn=" + id
       </div>-->
       <!-- Main content
       =============================================== -->
-      <div class='span5 main'>
+      <div class='span3 main'>
         <!-- AS list
         ============================================= -->
         <section id="total">
-          <div class="page-header">
-            <h1>Distribution of RPKI states</h1>
-          </div>
-          <p>Select an AS number below to view the corresponding charts:</p>
-        	<select name="asn" [B] onChange="Refresh(this.value)"[/B]>
-            <option> </option>
-        		<?php
-              getASlist();
-            ?>
-        	</select>
+          <?php print "$select" ?>
+              <form class="navbar-search pull-left">
+    <input type="text" class="search-query" placeholder="AS Number" id="searchfield"/>
+    </form>
         </section>
       </div>
         <?php
-        if (isset($asn)){
-          echo "<div class='span7 main'>
+	if (isset($asn)){
+	  echo "<div class='span9 main'>
           <section id='charts'>
           <div class='page-header'>
             <h1>Charts for AS$asn</h1>
@@ -82,14 +80,33 @@ location.href="peras.php?asn=" + id
           <div id='Chart1'></div>";
             
             if (query_totals_peras('I%', $asn) != 0){
-            echo "<div id='Chart2'></div>";
+            echo "<div id='Chart2'></div>
+		<div id='Chart3'></div>";
             }
-          echo "</section></div>";
+	newtable($asn);  
+	echo "</section></div>";
         }
             ?>
     </div>
   </div>
 <script type="text/javascript" src="bootstrap/js/jquery-1.10.1.min.js"></script>
 <script type="text/javascript" src="bootstrap/js/bootstrap.min.js"></script>
+<script type="text/javascript">
+$(document).ready(function() {
+    $("#searchfield").typeahead({
+        minLength: 1,
+        source: function(query, process) {
+            $.post('getaslist.php', { q: query, limit: 8 }, function(data) {
+                process(JSON.parse(data));
+            });
+
+        },
+        updater: function (item) {
+            document.location = "peras.php?asn=" + encodeURIComponent(item);
+            return item;
+        }
+    });
+});
+</script>
 </body>
 </html>

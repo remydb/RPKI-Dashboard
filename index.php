@@ -1,4 +1,9 @@
 <!DOCTYPE html>
+<?php
+require ('include/gChart.php');
+require ('include/functions.php');
+require ('include/messages.php');
+?>
 <head>
 <title>RPKI Dashboard</title>
 <link href="bootstrap/css/bootstrap.css" rel="stylesheet">
@@ -26,12 +31,19 @@
   =================================================== -->
   <div class='container'>
     <div id='content' class='row-fluid'>
-      <div class='span12 main'>
-        <h2>RPKI Monitor</h2>
-          <p>This web page has been made to monitor the adoption rate of Route Origin Validation for BGP.
-            All BGP messages received through BGPmon during each day are stored in a database, this database can then be used to create graphs.<p> 
-          <p>What ever.. I'll put other stuff here some time. I can't be bothered to do it now..</p>
+
+ <!-- Sidebar
+ =============================================== -->
+      <div class="span3 sidebar" id="navparent">
+        <ul class="nav nav-list sidenav" data-spy="affix" data-offset-top="200">
+          <li><a href="#AS"><i class="icon-chevron-right"></i> Per AS</a></li>
+          <li><a href="#country"><i class="icon-chevron-right"></i> Per country</a></li>
+        </ul>
       </div>
+
+      <div class='span9 main'>
+     <?php print "$welcome" ?> 
+	</div>
     </div>
   </div>
 <script src="bootstrap/js/bootstrap.js"></script>

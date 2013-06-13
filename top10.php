@@ -2,6 +2,7 @@
 <?php
 require ('include/gChart.php');
 require ('include/functions.php');
+require ('include/messages.php');
 ?>
 <head>
 <title>RPKI Dashboard</title>
@@ -12,10 +13,10 @@ require ('include/functions.php');
 <script type="text/javascript">
 google.load('visualization', '1', {packages: ['corechart']});
 <?php 
-newbarchart('ASN', 'V', 'Top 10 ASes for valid routes', 'AS', 'Chart1');
-newbarchart('ASN', 'I%', 'Top 10 ASes for invalid routes', 'AS', 'Chart2');
-newbarchart('Country', 'V', 'Top 10 countries for valid routes', 'AS', 'Chart3');
-newbarchart('Country', 'I%', 'Top 10 countries for invalid routes', 'AS', 'Chart4');
+newbarchart('ASN', 'V', 'Number of valid routes announced', 'AS', 'Chart1', 10);
+newbarchart('ASN', 'I%', 'Number of invalid routes announced', 'AS', 'Chart2', 10);
+newbarchart('RIR', 'V', 'Number of valid routes announced', 'AS', 'Chart3', 6);
+newbarchart('RIR', 'I%', 'Number of invalid routes announced', 'AS', 'Chart4', 6);
 ?>  
 </script>
 </head>
@@ -57,9 +58,10 @@ newbarchart('Country', 'I%', 'Top 10 countries for invalid routes', 'AS', 'Chart
           <div class="page-header">
             <h1>Breakdown per AS</h1>
           </div>
-        <h2>Best</h2>
-        <div id="Chart1"></div>
-        <h2>Worst</h2>
+        <?php print "$placeholder" ?>
+	<h2>Most valid prefix announcements per AS.</h2>
+	<div id="Chart1"></div>
+        <h2>Most invalid prefix announcements per AS</h2>
         <div id="Chart2"></div>
         </section>
 
@@ -67,11 +69,14 @@ newbarchart('Country', 'I%', 'Top 10 countries for invalid routes', 'AS', 'Chart
         ============================================= -->
         <section id="country">
           <div class="page-header">
-            <h1>Breakdown per country</h1>
-          </div>
-        <h2>Best</h2>
+            <h1>Breakdown per RIR</h1>
+       	<?php
+	rirtable();
+	?>   
+	</div>
+        <h2>Most valid prefix announcements per RIR</h2>
         <div id="Chart3"></div>
-        <h2>Worst</h2>
+        <h2>Most invalid prefix announcements per RIR</h2>
         <div id="Chart4"></div>
         </section>
       </div>
