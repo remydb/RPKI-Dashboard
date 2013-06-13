@@ -71,18 +71,23 @@ def main():
 #    print "USE bgp;"
 #    print """DROP TABLE IF EXISTS `export`;"""
 #    print """DROP TABLE IF EXISTS `announcements`;"""
-#    print """CREATE TABLE `export` ( 
-#        ASN VARCHAR(20), 
-#        IP_Prefix VARCHAR(70), 
-#        Max_Length VARCHAR(128), 
-#        bin VARCHAR(130), 
-#        PRIMARY KEY (ASN, IP_Prefix, Max_Length));"""
-#    print """CREATE TABLE `announcements` (
-#	ASN VARCHAR(20),
-#	IP_Prefix VARCHAR(70),
-#	Validity VARCHAR(2),
-#	Country VARCHAR(40),
-#	PRIMARY KEY (ASN, IP_PREFIX));"""
+ #   print """CREATE TABLE `today_vrp` ( 
+ #       id INT NOT NULL AUTO_INCREMENT,
+ #       ASN INT(10), 
+ #       IP_Prefix VARCHAR(43), 
+ #       Max_Length TINYINT(3), 
+ #       bin VARCHAR(128), 
+ #       PRIMARY KEY (ASN, IP_Prefix, Max_Length),
+ #       INDEX (id));"""
+ #   print """CREATE TABLE `today_routes` (
+	# ASN INT(10),
+	# Prefix VARCHAR(43),
+	# Validity VARCHAR(2),
+	# Country VARCHAR(2),
+ #    VRP VARCHAR(100),
+ #    RISAS INT(10),
+ #    IPver TINYINT(1),
+	# PRIMARY KEY (ASN, Prefix));"""
     if filename == "-":
         if opts.table is None:
             print "ERROR: No table specified and stdin used."
@@ -109,7 +114,7 @@ def main():
             continue
 
         values = ", ".join(["\"%s\"" % x for x in row])
-        print "REPLACE INTO %s (%s) VALUES (%s);" % (table, fields, values)
+        print "INSERT INTO %s (%s) VALUES (%s);" % (table, fields, values)
 
 if __name__ == "__main__":
     main()
