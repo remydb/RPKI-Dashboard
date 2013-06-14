@@ -1,16 +1,14 @@
 <!DOCTYPE html>
 <?php
-require ('include/gChart.php');
 require ('include/functions.php');
-require ('include/messages.php');
 if (isset($_GET['asn'])){
   $asn = $_GET['asn'];
 }
 ?>
 <head>
 <title>RPKI Dashboard</title>
-<link href="bootstrap/css/bootstrap.css" rel="stylesheet">
-<link href="bootstrap/css/bootstrap-responsive.css" rel="stylesheet">
+<link href="bootstrap/css/bootstrap.min.css" rel="stylesheet">
+<link href="bootstrap/css/bootstrap-responsive.min.css" rel="stylesheet">
 <link href="bootstrap/css/custom.css" rel="stylesheet">
 <script type="text/javascript" src="http://www.google.com/jsapi"></script>
 <script type="text/javascript">
@@ -22,11 +20,6 @@ newpichartperas($asn, 'IA', 'IP', 'IB', 'Invalid AS', 'Invalid Prefix', 'Both In
 newlinechart('V', 'I%', 'Title', 'Chart3', $asn);
 }
 ?>
-</script>
-<script>
-function Refresh(id){
-location.href="peras.php?asn=" + id
-}
 </script>
 </head>
 <body data-target="#navparent" data-offset="40" data-spy="scroll">
@@ -64,9 +57,9 @@ location.href="peras.php?asn=" + id
         <!-- AS list
         ============================================= -->
         <section id="total">
-          <?php print "$select" ?>
+          <div class=\"well\">Please <strong>select an AS number </strong>from the dropdown list below.</div>
               <form class="navbar-search pull-left">
-    <input type="text" class="search-query" placeholder="AS Number" id="searchfield"/>
+    <input type="text" class="search-query" placeholder="AS Number" id="searchfield" autocomplete="off"/>
     </form>
         </section>
       </div>
@@ -81,18 +74,24 @@ location.href="peras.php?asn=" + id
             
             if (query_totals_peras('I%', $asn) != 0){
             echo "<div id='Chart2'></div>
-		<div id='Chart3'></div>";
-            }
+		<div id='Chart3'></div></section>";
+            };
+  echo "<div id='dat_table'>";
 	newtable($asn);  
-	echo "</section></div>";
+  echo "</div>";
+	echo "</div>";
         }
             ?>
     </div>
   </div>
 <script type="text/javascript" src="bootstrap/js/jquery-1.10.1.min.js"></script>
 <script type="text/javascript" src="bootstrap/js/bootstrap.min.js"></script>
+<script class="jsbin" src="bootstrap/js/jquery.dataTables.nightly.js"></script>
+<script type="text/javascript" src="bootstrap/js/paging.js"></script>
 <script type="text/javascript">
+var buttonid;
 $(document).ready(function() {
+
     $("#searchfield").typeahead({
         minLength: 1,
         source: function(query, process) {
@@ -106,7 +105,44 @@ $(document).ready(function() {
             return item;
         }
     });
+    $('.btn').each(function() {
+      //console.log(this.id);
+      $(this).click(function(){
+        var el = $(this);
+        // $.post('getroalist.php', {p: this.id}, function(data) {
+        //   el.attr('data-content', data);          
+        // });
+        //el.popover({
+        //     placement: 'top',
+        //     html: true
+        //});
+      $.ajax({
+        type: "POST",
+        url: 'getroalist.php',
+        data: {p: this.id},
+        success: function(data) {
+          el.attr('data-content', data);
+          el.popover({
+            placement: 'top',
+            html: true,
+            trigger: 'manual'
+          });
+          el.popover('toggle');
+        }
+      });
+      });
+      
+    });
+    $('#pagetable').dataTable( {
+
+      "sPaginationType": "bootstrap"
+    } );
 });
+</script>
+<script>
+function Refresh(id){
+location.href="peras.php?asn=" + id
+}
 </script>
 </body>
 </html>

@@ -1,8 +1,6 @@
 <!DOCTYPE html>
 <?php
-require ('include/gChart.php');
 require ('include/functions.php');
-require ('include/messages.php');
 ?>
 <head>
 <title>RPKI Dashboard</title>
@@ -14,7 +12,7 @@ require ('include/messages.php');
 google.load('visualization', '1', {packages: ['geochart']});
 <?php
 newgeochart('V', 'Valid routes per country', 'Chart1');
-newgeochart('I%', 'Inalid routes per country', 'Chart2');
+newgeochart('I%', 'Valid routes per country', 'Chart2');
 newgeochart('U', 'Unknown routes per country', 'Chart3');
 ?>
 </script>
@@ -56,20 +54,22 @@ newgeochart('U', 'Unknown routes per country', 'Chart3');
         ============================================= -->
         <section id="valid">
           <div class="page-header">
-            <h1>Percent valid routes per country</h1>
-		<?php print "$location"?>
+            <h1>Percent valid routes per RIR</h1>
+		        <div class=\"well\"> To determine the geographical location of an IPv4-prefix we inspect an IP to see which
+            /8 it belongs to. We then match this /8 to the appropriate RIR and match each RIR to a group of countries.</div>
           </div>
           <div id="Chart1"></div>
         </section>
         <section id="invalid">
           <div class="page-header">
-            <h1>Percent invalid routes per country</h1>
+            <h1>Percent invalid routes per RIR</h1>
           </div>
           <div id="Chart2"></div>
         </section>
-        <section id="unknown">
+        <section id="Unknown">
           <div class="page-header">
-            <h1>Percent unknown routes per country</h1>
+            <h1>Percent unknown routes per RIR</h1>
+            <?php print "$location"?>
           </div>
           <div id="Chart3"></div>
         </section>

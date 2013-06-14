@@ -1,6 +1,8 @@
 <!DOCTYPE html>
 <?php
+require ('include/gChart.php');
 require ('include/functions.php');
+require ('include/messages.php');
 ?>
 <head>
 <title>RPKI Dashboard</title>
@@ -10,12 +12,8 @@ require ('include/functions.php');
 <script type="text/javascript" src="http://www.google.com/jsapi"></script>
 <script type="text/javascript">
 google.load('visualization', '1', {packages: ['corechart']});
-<?php 
-newbarchart('ASN', 'V', 'Number of valid routes announced', 'AS', 'Chart1', 10);
-newbarchart('ASN', 'I%', 'Number of invalid routes announced', 'AS', 'Chart2', 10);
-newbarchart('RIR', 'V', 'Number of valid routes announced', 'AS', 'Chart3', 6);
-newbarchart('RIR', 'I%', 'Number of invalid routes announced', 'AS', 'Chart4', 6);
-?>  
+</script>
+<script>
 </script>
 </head>
 <body data-target="#navparent" data-offset="40" data-spy="scroll">
@@ -41,43 +39,35 @@ newbarchart('RIR', 'I%', 'Number of invalid routes announced', 'AS', 'Chart4', 6
     <div class='row-fluid' id='content'>
       <!-- Sidebar
       =============================================== -->
-      <div class="span3 sidebar" id="navparent">
+      <!--<div class="span3 sidebar" id="navparent">
         <ul class="nav nav-list sidenav" data-spy="affix" data-offset-top="200">
-          <li><a href="#AS"><i class="icon-chevron-right"></i> Per AS</a></li>
-          <li><a href="#RIR"><i class="icon-chevron-right"></i> Per RIR</a></li>
+          <li><a href="#total"><i class="icon-chevron-right"></i> Total</a></li>
+          <li><a href="#invalids"><i class="icon-chevron-right"></i> Invalids</a></li>
         </ul>
-      </div>
+      </div>-->
       <!-- Main content
       =============================================== -->
-      <div class='span9 main'>
+      <div class='span3 main'>
+        <!-- AS list
+        ============================================= -->
+        <section id="total">
+          <?php print "$select" ?>
+        </section>
+      </div>
+	<div class='span9 main'>
         <!-- Per AS
         ============================================= -->
         <section id="AS">
           <div class="page-header">
-            <h1>Breakdown per AS</h1>
-          </div>
-        <div class=\"well\">This is a <strong>placeholder message!</strong></div>
-	<h2>Most valid prefix announcements per AS.</h2>
-	<div id="Chart1"></div>
-        <h2>Most invalid prefix announcements per AS</h2>
-        <div id="Chart2"></div>
-        </section>
-
-        <!-- Per RIR
-        ============================================= -->
-        <section id="RIR">
-          <div class="page-header">
             <h1>Breakdown per RIR</h1>
-	</div>
-        <h2>Most valid prefix announcements per RIR</h2>
-        <div id="Chart3"></div>
-        <h2>Most invalid prefix announcements per RIR</h2>
-        <div id="Chart4"></div>
-        </section>
+        <?php
+        rirtable();
+        ?>        
+       </div> 
+	</section>
       </div>
     </div>
   </div>
-<script type="text/javascript" src="bootstrap/js/jquery-1.10.1.min.js"></script>
-<script type="text/javascript" src="bootstrap/js/bootstrap.min.js"></script>
+</script>
 </body>
 </html>

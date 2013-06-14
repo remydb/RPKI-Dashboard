@@ -1,8 +1,11 @@
 <!DOCTYPE html>
 <?php
-require ('include/gChart.php');
 require ('include/functions.php');
-require ('include/messages.php');
+$vartotal = query_total_prefixes('%');
+$varunknown = query_total_prefixes('U');
+$varinvalid = query_total_prefixes('I%');
+$varvalid = query_total_prefixes('V');
+$varvalidation = $vartotal - $varunknown;
 ?>
 <head>
 <title>RPKI Dashboard</title>
@@ -49,7 +52,11 @@ newlinechart('V', 'I%', 'Title', 'Chart1','%');
       </div>
 
       <div class='span9 main'>
-       <?php print "$trends" ?>   
+       <?php echo "<h2>Trends</h2><div class=\"well\">From the <span class=\"badge badge-success\">$vartotal</span> prefixes that
+are currently in the routing table, <span class=\"badge badge-success\">$varvalidation</span> match at least
+one ROA. From these matched prefixes <span class=\"badge badge-important\">$varinvalid</span>
+are <strong>invalid</strong> while <span class=\"badge badge-success\">$varvalid</span> are valid. The 
+line chart below shows the valid and invalid routes over the course of time.</div>"; ?>   
 	<div id='Chart1'></div>
       </div>
     </div>

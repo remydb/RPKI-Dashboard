@@ -24,6 +24,34 @@ section {
     padding-top: 0px;
   }
 }
+
+div.dataTables_length label {
+  float: left;
+  text-align: left;
+}
+
+div.dataTables_length select {
+  width: 75px;
+}
+
+div.dataTables_filter label {
+  float: right;
+}
+#pagetable {
+  float: left;
+}
+div.dataTables_info {
+  float:left;
+  padding-top: 8px;
+}
+
+div.dataTables_paginate {
+  float: right;
+  margin: 0;
+}
+
+#clickme .popover {width: 300px;}
+
 .sidenav {
   width: 228px;
   margin: 30px 0 0;

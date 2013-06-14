@@ -1,8 +1,12 @@
 <!DOCTYPE html>
 <?php
-require ('include/gChart.php');
 require ('include/functions.php');
-require ('include/messages.php')
+$vartotal = query_total_prefixes('%');
+$varunknown = query_total_prefixes('U');
+$varinvalid = query_total_prefixes('I%');
+$varvalid = query_total_prefixes('V');
+$varvalidation = $vartotal - $varunknown;
+$varpercent = round($varvalidation / $vartotal * 100, 2);
 ?>
 <head>
 <title>RPKI Dashboard</title>
@@ -56,7 +60,11 @@ newpichart2('IA', 'IP', 'IB', 'V', 'Invalid AS', 'Invalid Prefix', 'Both Invalid
           <div class="page-header">
             	<h1>Distribution of RPKI states</h1>
 	</div>
-        <?php print "$message" ?>
+        <?php echo "<div class=\"well\">This page provides an overview of the current state of <strong>RPKI adoption</strong>.
+Yesterdays routing table holds <span class=\"badge badge-success\">$vartotal</span> prefixes. The
+valdation state has been determined for <span class=\"badge badge-success\">$varvalidation</span>
+<strong>prefixes</strong>. This means that <span class=\"badge badge-success\">$varpercent%</span>
+of the prefixes in the routing table is <strong>configured for RPKI.</strong></div>"; ?>
 	<div id="Chart1"></div>
         </section>
 
@@ -66,7 +74,10 @@ newpichart2('IA', 'IP', 'IB', 'V', 'Invalid AS', 'Invalid Prefix', 'Both Invalid
           <div class="page-header">
             <h1>Distribution of invalids</h1>
           </div>
-          <?php print "$message2" ?>
+          <?php echo "<div class=\"well\">From the <span class=\"badge badge-success\">$varvalidation</span> prefixes that
+are <strong>configured to use RPKI</strong>, <span class=\"badge badge-important\">$varinvalid</span>
+are <strong>invalid</strong>. The <strong>reason</strong> for these <strong>invalidated prefixes</strong>
+is shown in the <strong>pie chart below.</strong></div>"; ?>
 	<div id="Chart2"></div>
         </section>
       </div>
