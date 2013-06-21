@@ -37,7 +37,7 @@
       </div>-->
 
       <div class='span9 main'>
-     <h1>Welcome!</h1><div class=\"well\"><p>This web page has been made to monitor the adoption rate of Route Origin 
+     <h1>Welcome!</h1><div class="well"><p>This web page has been made to monitor the adoption rate of Route Origin 
   Validation for BGP. A database is created daily using the most recent RIS database dumps provided by RIPE. These 
   databases are used to extract all the statistics shown on this website.<p> 
 	</div>

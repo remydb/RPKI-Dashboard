@@ -13,6 +13,24 @@ function mySQLi()
     return $mysqli; 
 }
 
+function getRIRlist()
+{
+    $mysqli = mySQLi();
+
+    $query = "SELECT DISTINCT(RIR) as RIR FROM `".$GLOBALS['date']."` ORDER BY RIR";
+    if (!$result = $mysqli->query($query))
+    {
+        echo "Query failed: (" . $mysqli->errno . ") " . $mysqli->error;
+    }
+
+    while ($row = $result->fetch_row())
+    {
+        //echo "<a href='anpie.php?asn=" . $row[0] . "'>AS" . $row[0] . "</a><br>";
+        echo "<option value='" . $row[0] . "'>" . $row[0] . "</option>";
+    }
+    $mysqli->close();
+}
+
 function getASlist()
 {
     $mysqli = mySQLi();
@@ -56,14 +74,14 @@ function getASlistjson($part, $limit)
     return rtrim($a, ", ");
 }
 
-function query_totals($status)
+function query_totals($status, $ipver = '%')
 {
     $mysqli = mySQLi();
     
-    if (!($stmt = $mysqli->prepare("SELECT count(*) FROM `".$GLOBALS['date']."` where Validity like ?"))) {
+    if (!($stmt = $mysqli->prepare("SELECT count(*) FROM `".$GLOBALS['date']."` where Validity like ? and IPver like ?"))) {
         echo "Prepare failed: (" . $mysqli->errno . ") " . $mysqli->error;
     }
-    $stmt->bind_param("s", $status);
+    $stmt->bind_param("ss", $status, $ipver);
     if (!$stmt->execute()) {
          echo "Execute failed: (" . $stmt->errno . ") " . $stmt->error;
     }
@@ -132,10 +150,10 @@ function query_total_prefixes($status)
         return $total;
 }
 
-function newpichart($a, $b, $c, $lega, $legb, $legc, $title, $chart){
-        $vara = query_totals($a);
-        $varb = query_totals($b);
-        $varc = query_totals($c);
+function newpichart($a, $b, $c, $lega, $legb, $legc, $title, $chart, $ipver = '%'){
+        $vara = query_totals($a, $ipver);
+        $varb = query_totals($b, $ipver);
+        $varc = query_totals($c, $ipver);
         $total = $vara + $varb + $varc;
         $pera = round($vara / $total * 100, 2);
         $perb = round($varb / $total * 100, 2);
@@ -143,38 +161,128 @@ function newpichart($a, $b, $c, $lega, $legb, $legc, $title, $chart){
         
     print "google.setOnLoadCallback(draw$chart);
         function draw$chart() {
-        var data = google.visualization.arrayToDataTable([
-            ['Topping', 'Slices'],
-        ['$lega - $pera%', $vara],
-        ['$legb - $perb%', $varb],
-        ['$legc - $perc%', $varc]
-        ]);
+            var data = google.visualization.arrayToDataTable([
+            ['Legend - Percent', 'Value'],
+            ['$lega - $pera%', $vara],
+            ['$legb - $perb%', $varb],
+            ['$legc - $perc%', $varc]
+            ]);
 
-        // Create and draw the visualization.
-        var options = {'title':'$title','width':800,'height':600,'is3D':1};
-        new google.visualization.PieChart(document.getElementById('$chart')).
-            draw(data, options);
-      }";
+            // Create and draw the visualization.
+            var options = {'title':'$title','width':800,'height':600,'is3D':1};
+
+            var chart = new google.visualization.PieChart(document.getElementById('$chart'));
+            chart.draw(data, options);
+
+            function selectHandler(e) {
+                var selection = chart.getSelection();
+
+                for (var i = 0; i < selection.length; i++) {
+                    var item = selection[i];
+                    if (item.row != null && item.column != null) {
+                      var str = data.getFormattedValue(item.row, item.column);
+                    } else if (item.row != null) {
+                      var str = data.getFormattedValue(item.row, 0);
+                    } else if (item.column != null) {
+                      var str = data.getFormattedValue(0, item.column);
+                    }
+                }
+                if (str.substr(0,1) == 'U'){
+                    return; //Do nothing
+                }
+                else {
+                    $('#waitpopup').modal('show');
+                    window.location.href='http://academic.slowpoke.nl/validitytables.php?v=' + str.substr(0,1) + '%';
+                }                  
+            }
+
+            if (location.pathname.substring(1) == 'global.html' || location.pathname.substring(1) == 'global.php'){
+                google.visualization.events.addListener(chart, 'select', selectHandler);
+            }
+        }";
 }
 
-function newpichart2($a, $b, $c, $d, $lega, $legb, $legc, $legd, $title, $chart){
-        $vara = query_totals($a);
-        $varb = query_totals($b);
-        $varc = query_totals($c);
-        $vard = query_totals($d); 
-    $total = $vara + $varb + $varc + $vard;
+function newpichart2($a, $b, $c, $d, $e, $lega, $legb, $legc, $legd, $lege, $title, $chart, $ipver = '%'){
+        $vara = query_totals($a, $ipver);
+        $varb = query_totals($b, $ipver);
+        $varc = query_totals($c, $ipver);
+        $vard = query_totals($d, $ipver); 
+	$vare = query_totals($e);    
+	$total = $vara + $varb + $varc + $vard + $vare;
         $pera = round($vara / $total * 100, 2);
         $perb = round($varb / $total * 100, 2);
         $perc = round($varc / $total * 100, 2);
-    $perd = round($vard / $total * 100, 2);
-        print "google.setOnLoadCallback(draw$chart);
+    	$perd = round($vard / $total * 100, 2);
+        $pere = round($vare / $total * 100, 2);
+	print "google.setOnLoadCallback(draw$chart);
         function draw$chart() {
         var data = google.visualization.arrayToDataTable([
                 ['Topping', 'Slices'],
                 ['$lega - $vara ($pera%)', $vara],
                 ['$legb - $varb ($perb%)', $varb],
                 ['$legc - $varc ($perc%)', $varc],
-        ['$legd - $vard ($perd%)', $vard]
+        	['$legd - $vard ($perd%)', $vard],
+		['$lege - $vare ($pere%)', $vare]
+        ]);
+
+        // Create and draw the visualization.
+        var options = {'title':'$title','width':800,'height':600,'is3D':1};
+        var chart = new google.visualization.PieChart(document.getElementById('$chart'));
+        chart.draw(data, options);
+
+        google.visualization.events.addListener(chart, 'select', selectHandler);
+
+            function selectHandler(e) {
+                var selection = chart.getSelection();
+
+                for (var i = 0; i < selection.length; i++) {
+                    var item = selection[i];
+                    if (item.row != null && item.column != null) {
+                      var str = data.getFormattedValue(item.row, item.column);
+                    } else if (item.row != null) {
+                      var str = data.getFormattedValue(item.row, 0);
+                    } else if (item.column != null) {
+                      var str = data.getFormattedValue(0, item.column);
+                    }
+                }
+                if (str.indexOf('Invalid AS') !== -1){
+                    var validity = 'IA';
+                }
+                else if (str.indexOf('Fixed') !== -1){
+                    var validity = 'IP';
+                }
+                else if (str.indexOf('Range') !== -1){
+                    var validity = 'IQ';
+                }
+                else if (str.indexOf('AS & Prefix') !== -1){
+                    var validity = 'IB';
+                }
+                else if (str.indexOf('Valid') !== -1){
+                    var validity = 'V';
+                }
+                $('#waitpopup').modal('show');
+                window.location.href='http://academic.slowpoke.nl/validitytables.php?v=' + validity;               
+            }
+
+            if (location.pathname.substring(1) == 'global.html' || location.pathname.substring(1) == 'global.php'){
+                google.visualization.events.addListener(chart, 'select', selectHandler);
+            }
+      }";
+}
+
+function newpichartperip($validity, $title, $chart){
+        $vara = query_totals($validity, '4');
+        $varb = query_totals($validity, '6');
+        $total = $vara + $varb;
+        $pera = round($vara / $total * 100, 2);
+        $perb = round($varb / $total * 100, 2);
+        
+    print "google.setOnLoadCallback(draw$chart);
+        function draw$chart() {
+        var data = google.visualization.arrayToDataTable([
+            ['Topping', 'Slices'],
+        ['IPv4 - $pera%', $vara],
+        ['IPv6 - $perb%', $varb]
         ]);
 
         // Create and draw the visualization.
@@ -184,23 +292,74 @@ function newpichart2($a, $b, $c, $d, $lega, $legb, $legc, $legd, $title, $chart)
       }";
 }
 
-function newpichartperas($asn, $a, $b, $c, $lega, $legb, $legc, $title, $chart){
+function newpichartperas($asn, $a, $b, $c, $lega, $legb, $legc, $title, $chart, $d = NULL, $legd = NULL, $e = NULL, $lege = NULL){
         $vara = query_totals_peras($a, $asn);
         $varb = query_totals_peras($b, $asn);
         $varc = query_totals_peras($c, $asn);
-        $total = $vara + $varb + $varc;
+        if ($d != NULL){
+            $vard = query_totals_peras($d, $asn);
+            $vare = query_totals_peras($e, $asn);
+            $total = $vara + $varb + $varc + $vard + $vare;
+        }
+        else{
+            $total = $vara + $varb + $varc;
+        }
         $pera = round($vara / $total * 100, 2);
         $perb = round($varb / $total * 100, 2);
         $perc = round($varc / $total * 100, 2);
+        if ($d != NULL){
+            $perd = round($vard / $total * 100, 2);
+            $pere = round($vare / $total * 100, 2);
+        }
         
     print "google.setOnLoadCallback(draw$chart);
         function draw$chart() {
         var data = google.visualization.arrayToDataTable([
-            ['Topping', 'Slices'],\n['$lega - $pera%', $vara],\n['$legb - $perb%', $varb],\n['$legc - $perc%', $varc]
-        ]);
+            ['Topping', 'Slices'],\n['$lega - $pera%', $vara],\n['$legb - $perb%', $varb],\n['$legc - $perc%', $varc],";
+        if ($d != NULL){
+            echo "\n['$legd - $perd%', $vard],\n['$lege - $pere%', $vare]";
+        }
+        echo "]);
 
         // Create and draw the visualization.
-        var options = {'title':'$title','width':800,'height':600,'is3D':1};
+        var options = {'title':'$title','width':800,'height':500,'is3D':1};
+        new google.visualization.PieChart(document.getElementById('$chart')).
+            draw(data, options);
+      }";
+}
+
+function newpichartperrir($rir, $a, $b, $c, $lega, $legb, $legc, $title, $chart, $d = NULL, $legd = NULL, $e = NULL, $lege = NULL){
+        $vara = query_totals_per_rir($a, $rir);
+        $varb = query_totals_per_rir($b, $rir);
+        $varc = query_totals_per_rir($c, $rir);
+        
+        if ($d != NULL){
+            $vard = query_totals_per_rir($d, $rir);
+            $vare = query_totals_per_rir($e, $rir);
+            $total = $vara + $varb + $varc + $vard + $vare;
+        }
+        else{
+            $total = $vara + $varb + $varc;
+        }
+        $pera = round($vara / $total * 100, 2);
+        $perb = round($varb / $total * 100, 2);
+        $perc = round($varc / $total * 100, 2);
+        if ($d != NULL){
+            $perd = round($vard / $total * 100, 2);
+            $pere = round($vare / $total * 100, 2);
+        }
+        
+    print "google.setOnLoadCallback(draw$chart);
+        function draw$chart() {
+        var data = google.visualization.arrayToDataTable([
+            ['Topping', 'Slices'],\n['$lega - $pera%', $vara],\n['$legb - $perb%', $varb],\n['$legc - $perc%', $varc],";
+        if ($d != NULL){
+            echo "\n['$legd - $perd%', $vard],\n['$lege - $pere%', $vare]";
+        }
+        echo "]);
+
+        // Create and draw the visualization.
+        var options = {'title':'$title','width':800,'height':500,'is3D':1};
         new google.visualization.PieChart(document.getElementById('$chart')).
             draw(data, options);
       }";
@@ -261,6 +420,92 @@ function newbarchart($type, $validity, $title, $group, $chart, $amount){
         //width: 800,
         height: 400,
         chartArea:{left:0,top:0,width:\"80%\",height:\"80%\"} 
+        };
+        
+        var chart = new google.visualization.BarChart(document.getElementById('$chart'));
+        chart.draw(data, options);
+
+        google.visualization.events.addListener(chart, 'select', selectHandler);
+
+        function selectHandler(e) {
+            var selection = chart.getSelection()[0];
+            var label = data.getColumnLabel(selection.column);
+            if (label.substr(0,2) == 'AS'){
+                $('#waitpopup').modal('show');
+                window.location.href='http://academic.slowpoke.nl/peras.php?asn=' + label.substr(2).split(' ')[0];
+            }
+        }
+      }";
+}
+
+function newrirbarchart($RIR, $chart){
+    $mysqli = mySQLi();
+
+    $query = "SELECT `RIR`, 
+            COUNT(`RIR`) AS `occurrence` 
+            FROM `".$GLOBALS['date']."` 
+            WHERE Validity LIKE 'V'
+            AND RIR = '$RIR'
+            GROUP BY `RIR` ORDER BY `occurrence`;";
+
+    if (!$result = $mysqli->query($query))
+        {
+            echo "Query failed: (" . $mysqli->errno . ") " . $mysqli->error;
+        }
+        $stack = array();
+        $stack2 = array();
+        while ($row = $result->fetch_row())
+        {
+            array_push($stack, "Valid ($row[1])");// = $row[1];
+            array_push($stack2, $row[1]);
+        }
+
+    $query = "SELECT `RIR`, 
+            COUNT(`RIR`) AS `occurrence` 
+            FROM `".$GLOBALS['date']."` 
+            WHERE Validity LIKE 'I%'
+            AND RIR = '$RIR'
+            GROUP BY `RIR` ORDER BY `occurrence`;";
+
+    if (!$result = $mysqli->query($query))
+        {
+            echo "Query failed: (" . $mysqli->errno . ") " . $mysqli->error;
+        }
+        while ($row = $result->fetch_row())
+        {
+            array_push($stack, "Invalid ($row[1])");// = $row[1];
+            array_push($stack2, $row[1]);
+        }
+
+        $mysqli->close();
+        
+        //foreach ($stack as $v){
+    //print "'$v', ";
+    //} 
+    print "google.setOnLoadCallback(draw$chart);
+        function draw$chart() {
+        var data = google.visualization.arrayToDataTable([
+        ['Year',";
+    foreach ($stack as $v){
+        print "'$v',";
+    }
+    print "],";
+    
+    print " 
+    ['', ";
+    foreach ($stack2 as $v){
+                print "$v,";
+        }
+    print "]
+        ]);
+
+        // Create and draw the visualization.
+        var options = {
+        hAxis: {title: \"$RIR\"},
+        //width: 400,
+        height: 200,
+        isStacked: true,
+        chartArea:{left:0,top:0,width:\"80%\",height:\"80%\"} 
     };
         
         var chart = new google.visualization.BarChart(document.getElementById('$chart'));
@@ -278,19 +523,19 @@ function newbarchart($type, $validity, $title, $group, $chart, $amount){
       }";
 }
 
-function newlinechart($validity, $validity2, $title, $chart, $as){
+function newlinechart($validity, $validity2, $title, $chart, $as, $rir = '%', $lega, $legb){
         
         //Dirty way to create an array with dates of last 7 days
         //Should consider using dateperiod/dateinterval instead
         $daterange = array();
-        $daterange[0] = date("d-m-y", time()-604800)._routes; //7 days ago  
-        $daterange[1] = date("d-m-y", time()-518400)._routes; //6 days ago
-        $daterange[2] = date("d-m-y", time()-432000)._routes; //5 days ago
-        $daterange[3] = date("d-m-y", time()-345600)._routes; //4 days ago
-        $daterange[4] = date("d-m-y", time()-259200)._routes; //3 days ago
-        $daterange[5] = date("d-m-y", time()-172800)._routes; //2 days ago      
-        $daterange[6] = date("d-m-y", time()-86400)._routes;  //yesterday
-        $daterange[7] = date("d-m-y")._routes;  //today
+        $daterange[0] = date("d-m-y", time()-604800)."_routes"; //7 days ago  
+        $daterange[1] = date("d-m-y", time()-518400)."_routes"; //6 days ago
+        $daterange[2] = date("d-m-y", time()-432000)."_routes"; //5 days ago
+        $daterange[3] = date("d-m-y", time()-345600)."_routes"; //4 days ago
+        $daterange[4] = date("d-m-y", time()-259200)."_routes"; //3 days ago
+        $daterange[5] = date("d-m-y", time()-172800)."_routes"; //2 days ago      
+        $daterange[6] = date("d-m-y", time()-86400)."_routes";  //yesterday
+        $daterange[7] = date("d-m-y")."_routes";  //today
 
         $mysqli = mySQLi();
 
@@ -298,7 +543,7 @@ function newlinechart($validity, $validity2, $title, $chart, $as){
         foreach ($daterange as $xdate){
             $query = "SELECT COUNT(*) 
                 FROM `$xdate` 
-                WHERE Validity LIKE '$validity' AND ASN LIKE '$as'";
+                WHERE Validity LIKE '$validity' AND ASN LIKE '$as' AND RIR like '$rir'";
                 //echo $query.'\n';
             if ($result = $mysqli->query($query))
             {
@@ -313,7 +558,7 @@ function newlinechart($validity, $validity2, $title, $chart, $as){
         foreach ($daterange as $xdate){
                 $query = "SELECT COUNT(*)
                     FROM `$xdate`
-                    WHERE Validity LIKE '$validity2' AND ASN LIKE '$as'";
+                    WHERE Validity LIKE '$validity2' AND ASN LIKE '$as' AND RIR like '$rir'";
                     //echo $query.'\n';
                 if ($result = $mysqli->query($query))
                 {
@@ -330,7 +575,7 @@ function newlinechart($validity, $validity2, $title, $chart, $as){
     print "google.setOnLoadCallback(draw$chart);
         function draw$chart() {
         var data = google.visualization.arrayToDataTable([
-          ['Date','Valid', 'Invalid'],";
+          ['Date','$lega', '$legb'],";
 
          $keys = array_keys($stack);
          foreach ($keys as $key){
@@ -413,8 +658,8 @@ function newtable($as){
 
         /* fetch associative array */
         print "<table class=\"table table-striped table-bordered table-hover\" id=\"pagetable\">";
-        print "<col width=\"65%\"><col width=\"15%\"><col width=\"20%\">";
-    print "<thead><tr><th><b>Prefix</b></th><th><b>Validity</b></th><th><b>ROAs</b></th></b></tr></thead><tbody>";
+        print "<col width=\"55%\"><col width=\"15%\"><col width=\"15%\"><col width=\"15\">";
+    	print "<thead><tr><th><b>Prefix</b></th><th><b>IP Version</b></th><th><b>Validity</b></th><th><b>Info</b></th></tr></thead><tbody>";
         while ($row = $result->fetch_assoc()) {
         //if (substr('_abcdef', 0, 1) === '_')
             
@@ -422,13 +667,13 @@ function newtable($as){
                     //$roa = getrelroa($row["Prefix"]);
                     $class = "error";
                     $validity = "<span class=\"label label-important\">Invalid</span>";
-                    $button = "<div class=\"btn-group\"><button class=\"btn\" id=\"".$row['Prefix']."\" rel=\"popover\" data-content=\"\">Show ROAs</button></div>";
+                    $button = "<div class=\"btn-group\"><button class=\"btn\" id=\"".$row['Prefix']."\" rel=\"popover\" data-content=\"\">Show details</button></div>";
                     }
             elseif ($row["Validity"] == "V"){
                     //$roa = getrelroa($row["Prefix"]);
                     $class = "success";
                     $validity = "<span class=\"label label-success\">Valid</span>";
-                    $button = "<div class=\"btn-group\"><button class=\"btn\" id=\"".$row['Prefix']."\" rel=\"popover\" data-content=\"\">Show ROAs</button></div>";
+                    $button = "<div class=\"btn-group\"><button class=\"btn\" id=\"".$row['Prefix']."\" rel=\"popover\" data-content=\"\">Show details</button></div>";
                     }
             else {$class = "warning";
                   $validity = "<span class=\"label label-warning\">Unknown</span>";
@@ -436,8 +681,9 @@ function newtable($as){
                     }
             print "<tr class=\"$class\">
                     <td>".$row["Prefix"]."</td>
+                    <td>".$row["IPver"]."</td>
                     <td>$validity</td>
-                    <td>$button</td>
+                    <td><center>$button</center></td>
                    </tr>";
         }
         print "</tbody></table>";
@@ -446,18 +692,104 @@ function newtable($as){
         }
 }
 
+function validitytable($validity){
+    if ($validity == 'U'){
+        echo "<div class='alert alert-error'>Cannot show table with all unknown prefixes. Too many results.<br/><br/></div>
+        <pre>                                  _.---\"'\"\"\"\"\"'`--.._
+                             _,.-'                   `-._
+                         _,.\"                            -.
+                     .-\"\"   ___...---------.._             `.
+                     `---'\"\"                  `-.            `.
+                                                 `.            \
+                                                   `.           \
+                                                     \           \
+                                                      .           \
+                                                      |            .
+                                                      |            |
+                                _________             |            |
+                          _,.-'\"         `\"'-.._      :            |
+                      _,-'                      `-._.'             |
+                   _.'                              `.             '
+        _.-.    _,+......__                           `.          .
+      .'    `-\"'           `\"-.,-\"\"--._                 \        /
+     /    ,'                  |    __  \                 \      /
+    `   ..                       +\"  )  \                 \    /
+     `.'  \          ,-\"`-..    |       |                  \  /
+      / \" |        .'       \   '.    _.'                   .'
+     |,..\"--\"\"\"--..|    \"    |    `\"\"`.                     |
+   ,\"               `-._     |        |                     |
+ .'                     `-._+         |                     |
+/                           `.                        /     |
+|    `     '                  |                      /      |
+`-.....--.__                  |              |      /       |
+   `./ \"| / `-.........--.-   '              |    ,'        '
+     /| ||        `.'  ,'   .'               |_,-+         /
+    / ' '.`.        _,'   ,'     `.          |   '   _,.. /
+   /   `.  `\"'\"'\"\"'\"   _,^--------\"`.        |    `.'_  _/
+  /... _.`:.________,.'              `._,.-..|        \"'
+ `.__.'                                 `._  /
+                                           \"' </pre>";
+        return;
+    }
+
+    $mysqli = mySQLi();
+
+    $query = "SELECT Prefix, ASN, IPver, Validity
+        FROM `".$GLOBALS['date']."`
+        WHERE Validity LIKE '$validity'
+        GROUP BY `Prefix`";
+
+    if ($result = $mysqli->query($query)) {
+
+    /* fetch associative array */
+    print "<table class=\"table table-striped table-bordered table-hover\" id=\"pagetable\">";
+    print "<col width=\"40%\"><col width=\"15%\"><col width=\"15%\"><col width=\"15%\"><col width=\"15\">";
+    print "<thead><tr><th><b>Prefix</b></th><th><b>ASN</b></th><th><b>IP Version</b></th><th><b>Validity</b></th><th><b>Info</b></th></tr></thead><tbody>";
+    while ($row = $result->fetch_assoc()) {
+    //if (substr('_abcdef', 0, 1) === '_')
+        
+        if (strpos($row["Validity"],"I") !== false){
+                //$roa = getrelroa($row["Prefix"]);
+                $class = "error";
+                $validity = "<span class=\"label label-important\">Invalid</span>";
+                $button = "<div class=\"btn-group\"><button class=\"btn\" id=\"".$row['Prefix']."\" rel=\"popover\" data-content=\"\">Show details</button></div>";
+                }
+        elseif ($row["Validity"] == "V"){
+                //$roa = getrelroa($row["Prefix"]);
+                $class = "success";
+                $validity = "<span class=\"label label-success\">Valid</span>";
+                $button = "<div class=\"btn-group\"><button class=\"btn\" id=\"".$row['Prefix']."\" rel=\"popover\" data-content=\"\">Show details</button></div>";
+                }
+        else {$class = "warning";
+              $validity = "<span class=\"label label-warning\">Unknown</span>";
+              $button = " ";
+                }
+        print "<tr class=\"$class\">
+                <td>".$row["Prefix"]."</td>
+                <td>".$row["ASN"]."</td>
+                <td>".$row["IPver"]."</td>
+                <td>$validity</td>
+                <td><center>$button</center></td>
+               </tr>";
+    }
+    print "</tbody></table>";
+    /* free result set */
+    $result->free();
+    }
+}
+
 function rirtable(){
     $rirs = array('RIPE', 'LACNIC', 'ARIN', 'APNIC', 'AFRINIC');
 
-    print "<table class=\"table table-striped table-bordered table-hover\">
+    print "<table class=\"table table-striped table-bordered table-hover\" id=\"pagetable\"><thead>
     <tr>
-    <td width=\"200px\"><b>RIR</b></td>
-    <td><b>Total</span></b></td>
-    <td><b>Valid</span></b></td>
-    <td><b>Invalid</span></b></td>
-    <td><b>Unknown</span></b></td>
-    <td><b>RPKI Adoption Rate</span></b></td>
-    </tr>";
+    <th width=\"200px\"><b>RIR</b></th>
+    <th><b>Total</b></th>
+    <th><b>Valid</b></th>
+    <th><b>Invalid</b></th>
+    <th><b>Unknown</b></th>
+    <th><b>RPKI Adoption Rate</b></th>
+    </tr></thead><tbody>";
 
     foreach ($rirs as &$value) {
             $total = query_totals_per_rir('%', $value);
@@ -471,9 +803,9 @@ function rirtable(){
             $unknownper = round($unknown/$total*100,2);
 
             $adop = round(($total-$unknown)/$total*100,2);
-
-            print "<td>$value</td>
-            <td><span class=\"badge badge-info\">$total (100%)</span></td>
+            $lowercase = strtolower($value);
+            print "<tr><td><a href='perrir.php?rir=$lowercase'>$value</a></td>
+            <td><span class=\"label label-info\">$total (100%)</span></td>
             <td><span class=\"label label-success\">$valid ($validper%)</span></td>
             <td><span class=\"label label-important\">$invalid ($invalidper%)</span></td>
             <td><span class=\"label label-warning\">$unknown ($unknownper%)</span></td>
@@ -481,7 +813,7 @@ function rirtable(){
             </tr>";
             };
 
-    print "</table>";
+    print "</tbody></table>";
 }
 
 function newgeochart($validity, $title, $chart){    

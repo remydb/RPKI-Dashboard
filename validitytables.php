@@ -1,8 +1,8 @@
 <!DOCTYPE html>
 <?php
 require ('include/functions.php');
-if (isset($_GET['asn'])){
-  $asn = $_GET['asn'];
+if (isset($_GET['v'])){
+  $validity = $_GET['v'];
 }
 ?>
 <head>
@@ -10,17 +10,6 @@ if (isset($_GET['asn'])){
 <link href="bootstrap/css/bootstrap.min.css" rel="stylesheet">
 <link href="bootstrap/css/bootstrap-responsive.min.css" rel="stylesheet">
 <link href="bootstrap/css/custom.css" rel="stylesheet">
-<script type="text/javascript" src="http://www.google.com/jsapi"></script>
-<script type="text/javascript">
-google.load('visualization', '1', {packages: ['corechart']});
-<?php
-if (isset($asn)){
-newpichartperas($asn, 'V','I%','U', 'Valid', 'Invalid', 'Unknown', 'Percentages of (in)valid traffic', 'Chart1');
-newpichartperas($asn, 'IA', 'IP', 'IQ', 'Invalid AS', 'Invalid Prefix (Fixed length mismatch)', 'Invalid Prefix (Range length exceeded)', 'Cause of invalids', 'Chart2', 'IB', 'AS & Prefix mismatch', 'V', 'Valid'); 
-newlinechart('V', 'I%', 'Title', 'Chart3', $asn, '%', 'Valid', 'Invalid');
-}
-?>
-</script>
 </head>
 <body data-target="#navparent" data-offset="40" data-spy="scroll">
 
@@ -53,38 +42,36 @@ newlinechart('V', 'I%', 'Title', 'Chart3', $asn, '%', 'Valid', 'Invalid');
       </div>-->
       <!-- Main content
       =============================================== -->
-      <div class='span3 main'>
+      <div class='span3'>
         <!-- AS list
         ============================================= -->
         <section id="total">
-          <div class="well">Please <strong>select an AS number </strong>from the dropdown list below.</div>
-        <?php if (!isset($asn)){echo "<div class='alert alert-error'><button type='button' class='close' data-dismiss='alert'>&times;</button>Loading the new page might take a few seconds because graphs are generated on demand, <b>please wait.</b></div>";}?>  
-	<div>
-		<form class="navbar-search pull-left">
-		<input type="text" class="search-query" placeholder="AS Number" id="searchfield" autocomplete="off"/>
-    		</form>
-	</div>
-      </section>
-      </div>
-        <?php
-	if (isset($asn)){
-	  echo "<div class='span9 main'>
-          <section id='charts'>
-          <div class='page-header'>
-            <h1>Charts for AS$asn</h1>
+          <div class="well">Please <strong>select a validity state</strong> from the dropdown list below.</div>
+          <?php if (!isset($validity)){echo "<div class='alert alert-error'><button type='button' class='close' data-dismiss='alert'>&times;</button>Loading the new page might take a few seconds because the tables are generated on demand, <b>please wait.</b></div>";}?> 
+          <div>
+            <form class="navbar-search pull-left">
+              <select name="rir" [B] onChange="Refresh(this.value)"[/B]>
+                <option> </option>
+                <option value='V'>Valid</option>
+                <option value='I%'>Invalid (all)</option>
+                <option value='IA'>Invalid - AS mismatch</option>
+                <option value='IQ'>Invalid - Prefix range length exceeded</option>
+                <option value='IP'>Invalid - Prefix fixed length mismatch</option>
+                <option value='IB'>Invalid - Prefix & AS mismatch</option>
+              </select>
+            </form>
           </div>
-          <div id='Chart1'></div>";
-            
-            if (query_totals_peras('I%', $asn) != 0){
-            echo "<div id='Chart2'></div>
-		<div id='Chart3'></div></section>";
-            };
-  echo "<div id='dat_table'>";
-	newtable($asn);  
-  echo "</div>";
-	echo "</div>";
-        }
-            ?>
+        </section>
+      </div>
+      <div class="span9 main">
+        <?php
+          if (isset($validity)){
+            //echo "<div id='dat_table'>";
+            validitytable($validity);  
+            //echo "</div>";
+          }
+        ?>
+      </div>
     </div>
   </div>
 <script type="text/javascript" src="bootstrap/js/jquery-1.10.1.min.js"></script>
@@ -149,7 +136,7 @@ $(document).ready(function() {
 </script>
 <script>
 function Refresh(id){
-location.href="peras.php?asn=" + id
+location.href="validitytables.php?v=" + id
 }
 </script>
 </body>

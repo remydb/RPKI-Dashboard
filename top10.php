@@ -13,8 +13,13 @@ google.load('visualization', '1', {packages: ['corechart']});
 <?php 
 newbarchart('ASN', 'V', 'Number of valid routes announced', 'AS', 'Chart1', 10);
 newbarchart('ASN', 'I%', 'Number of invalid routes announced', 'AS', 'Chart2', 10);
-newbarchart('RIR', 'V', 'Number of valid routes announced', 'AS', 'Chart3', 6);
-newbarchart('RIR', 'I%', 'Number of invalid routes announced', 'AS', 'Chart4', 6);
+//newrirbarchart('RIR', 'V', 'Number of valid routes announced', 'AS', 'Chart3', 6);
+//newrirbarchart('RIR', 'I%', 'Number of invalid routes announced', 'AS', 'Chart4', 6);
+newrirbarchart('AFRINIC', 'Chart3');
+newrirbarchart('APNIC', 'Chart4');
+newrirbarchart('ARIN', 'Chart5');
+newrirbarchart('LACNIC', 'Chart6');
+newrirbarchart('RIPE', 'Chart7');
 ?>  
 </script>
 </head>
@@ -56,10 +61,13 @@ newbarchart('RIR', 'I%', 'Number of invalid routes announced', 'AS', 'Chart4', 6
           <div class="page-header">
             <h1>Breakdown per AS</h1>
           </div>
-        <div class=\"well\">This is a <strong>placeholder message!</strong></div>
-	<h2>Most valid prefix announcements per AS.</h2>
+	<div class="well">The following charts show an overview of the autonomous systems that 
+          announced the <strong>most validated prefixes</strong>. These charts are generated daily using the most up to date
+          routing tables for IPv4 and IPv6 provided by <a href="http://www.ris.ripe.net/dumps/">RIPE</a>.<br />
+          Click on a <strong>bar</strong> or <strong>legend</strong> item to view additional information
+          for the corresponding AS number.</div>
 	<div id="Chart1"></div>
-        <h2>Most invalid prefix announcements per AS</h2>
+
         <div id="Chart2"></div>
         </section>
 
@@ -68,15 +76,25 @@ newbarchart('RIR', 'I%', 'Number of invalid routes announced', 'AS', 'Chart4', 6
         <section id="RIR">
           <div class="page-header">
             <h1>Breakdown per RIR</h1>
-	</div>
-        <h2>Most valid prefix announcements per RIR</h2>
+	        </div>
+          <div class="well">The following charts show an overview of the autonomous systems that 
+          announced the <strong>most invalidated prefixes</strong>.</div>
         <div id="Chart3"></div>
-        <h2>Most invalid prefix announcements per RIR</h2>
         <div id="Chart4"></div>
+        <div id="Chart5"></div>
+        <div id="Chart6"></div>
+        <div id="Chart7"></div>
         </section>
       </div>
     </div>
   </div>
+<div id="waitpopup" class="modal hide fade" tabindex="-1" role="dialog" aria-labelledby="Label" aria-hidden="true">
+  <div class="modal-header">
+    <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+    <h1>Please wait</h1>
+  </div>
+  <div class="modal-body"><div class="alert alert-info">The following page is generated on-the-fly, so it may take some time to load.</div></div>
+</div>
 <script type="text/javascript" src="bootstrap/js/jquery-1.10.1.min.js"></script>
 <script type="text/javascript" src="bootstrap/js/bootstrap.min.js"></script>
 </body>

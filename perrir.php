@@ -1,8 +1,9 @@
 <!DOCTYPE html>
 <?php
-require ('include/gChart.php');
 require ('include/functions.php');
-require ('include/messages.php');
+if (isset($_GET['rir'])){
+  $rir = $_GET['rir'];
+}
 ?>
 <head>
 <title>RPKI Dashboard</title>
@@ -12,6 +13,12 @@ require ('include/messages.php');
 <script type="text/javascript" src="http://www.google.com/jsapi"></script>
 <script type="text/javascript">
 google.load('visualization', '1', {packages: ['corechart']});
+<?php
+if (isset($rir)){
+  newpichartperrir($rir, 'V','I%','U', 'Valid', 'Invalid', 'Unknown', 'Percentages of invalid traffic', 'Chart1');
+  newpichartperrir($rir, 'IA', 'IP', 'IQ', 'Invalid AS', 'Invalid Prefix (Fixed length mismatch)', 'Invalid Prefix (Range length exceeded)', 'Cause of invalids', 'Chart2', 'IB', 'AS & Prefix mismatch', 'V', 'Valid'); 
+  newlinechart('V', 'I%', 'Title', 'Chart3', '%', $rir);
+}?>
 </script>
 <script>
 </script>
@@ -48,26 +55,64 @@ google.load('visualization', '1', {packages: ['corechart']});
       <!-- Main content
       =============================================== -->
       <div class='span3 main'>
-        <!-- AS list
+        <!-- RIR list
         ============================================= -->
+         <div class="well">Select a RIR below to view the corresponding charts:</div>
+	<div class="alert alert-error"><button type="button" class="close" data-dismiss="alert">&times;</button>Loading the new page might take a few seconds because graphs are generated on demand, <b>please wait.</b></div>   
+	<select name="rir" [B] onChange="Refresh(this.value)"[/B]>
+            <option> </option>
+            <option value='afrinic'>AFRINIC</option>
+            <option value='apnic'>APNIC</option>
+            <option value='arin'>ARIN</option>
+            <option value='lacnic'>LACNIC</option>
+            <option value='ripe'>RIPE</option>
+	</select>
         <section id="total">
-          <?php print "$select" ?>
         </section>
       </div>
 	<div class='span9 main'>
         <!-- Per AS
         ============================================= -->
-        <section id="AS">
-          <div class="page-header">
-            <h1>Breakdown per RIR</h1>
         <?php
+          $upperrir = strtoupper($rir);
+          if (isset($rir)){
+            echo "<section id='charts'>
+                  <div class='page-header'>
+                    <h1>Charts for $upperrir</h1>
+                  </div>
+                  <div id='Chart1'></div>";
+                    
+                    if (query_totals_per_rir('I%', $rir) != 0){
+                    echo "<div id='Chart2'></div>
+            <div id='Chart3'></div></section>";
+                    };
+          echo "</div>";
+        }
+        else{
+          echo "<div class='page-header'>
+                    <h1>Breakdown per RIR</h1>
+                  </div>";
         rirtable();
+        }
         ?>        
        </div> 
 	</section>
       </div>
     </div>
-  </div>
+<script type="text/javascript" src="bootstrap/js/jquery-1.10.1.min.js"></script>
+<script type="text/javascript" src="bootstrap/js/bootstrap.min.js"></script>
+<script class="jsbin" src="bootstrap/js/jquery.dataTables.nightly.js"></script>
+<script type="text/javascript" src="bootstrap/js/DT_bootstrap.js"></script>
+<script type="text/javascript">
+$(document).ready(function() {
+    $('#pagetable').dataTable( {
+
+      "sPaginationType": "bootstrap"
+    } );
+});
+function Refresh(id){
+location.href="perrir.php?rir=" + id
+}
 </script>
 </body>
 </html>

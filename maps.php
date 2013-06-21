@@ -66,10 +66,9 @@ newgeochart('U', 'Unknown routes per country', 'Chart3');
           </div>
           <div id="Chart2"></div>
         </section>
-        <section id="Unknown">
+        <section id="unknown">
           <div class="page-header">
             <h1>Percent unknown routes per RIR</h1>
-            <?php print "$location"?>
           </div>
           <div id="Chart3"></div>
         </section>
