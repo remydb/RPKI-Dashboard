@@ -5,14 +5,16 @@ if (isset($_GET['v'])){
   $validity = $_GET['v'];
 }
 ?>
+<html lang="en">
 <head>
+<META HTTP-EQUIV="Pragma" CONTENT="no-cache"> 
 <title>RPKI Dashboard</title>
 <link href="bootstrap/css/bootstrap.min.css" rel="stylesheet">
 <link href="bootstrap/css/bootstrap-responsive.min.css" rel="stylesheet">
 <link href="bootstrap/css/custom.css" rel="stylesheet">
 </head>
 <body data-target="#navparent" data-offset="40" data-spy="scroll">
-
+<div id='wrap'>
   <!-- Navbar stuff
   =================================================== -->
   <?php
@@ -21,12 +23,9 @@ if (isset($_GET['v'])){
 
   <!-- Header stuff
   =================================================== -->
-  <header class="jumbotron subhead" id="overview">
-  <div class="container">
-    <h1>RPKI Dashboard</h1>
-    <p class="lead">Stuffs</p>
-  </div>
-  </header>
+  <?php
+  include 'include/header.php';
+  ?>
 
   <!-- Body stuff
   =================================================== -->
@@ -47,13 +46,12 @@ if (isset($_GET['v'])){
         ============================================= -->
         <section id="total">
           <div class="well">Please <strong>select a validity state</strong> from the dropdown list below.</div>
-          <?php if (!isset($validity)){echo "<div class='alert alert-error'><button type='button' class='close' data-dismiss='alert'>&times;</button>Loading the new page might take a few seconds because the tables are generated on demand, <b>please wait.</b></div>";}?> 
           <div>
             <form class="navbar-search pull-left">
               <select name="rir" [B] onChange="Refresh(this.value)"[/B]>
                 <option> </option>
                 <option value='V'>Valid</option>
-                <option value='I%'>Invalid (all)</option>
+                <option value='I'>Invalid (all)</option>
                 <option value='IA'>Invalid - AS mismatch</option>
                 <option value='IQ'>Invalid - Prefix range length exceeded</option>
                 <option value='IP'>Invalid - Prefix fixed length mismatch</option>
@@ -74,6 +72,14 @@ if (isset($_GET['v'])){
       </div>
     </div>
   </div>
+  <div id='push'></div>
+</div>
+
+<footer class="footer">
+  <div class="container">
+    <?php include 'include/footer.php';?>
+  </div>
+</footer>
 <script type="text/javascript" src="bootstrap/js/jquery-1.10.1.min.js"></script>
 <script type="text/javascript" src="bootstrap/js/bootstrap.min.js"></script>
 <script class="jsbin" src="bootstrap/js/jquery.dataTables.nightly.js"></script>
@@ -81,20 +87,6 @@ if (isset($_GET['v'])){
 <script type="text/javascript">
 var buttonid;
 $(document).ready(function() {
-
-    $("#searchfield").typeahead({
-        minLength: 1,
-        source: function(query, process) {
-            $.post('getaslist.php', { q: query, limit: 8 }, function(data) {
-                process(JSON.parse(data));
-            });
-
-        },
-        updater: function (item) {
-            document.location = "peras.php?asn=" + encodeURIComponent(item);
-            return item;
-        }
-    });
     $('.btn').each(function() {
       //console.log(this.id);
       $(this).click(function(){
@@ -136,7 +128,7 @@ $(document).ready(function() {
 </script>
 <script>
 function Refresh(id){
-location.href="validitytables.php?v=" + id
+location.href="validitytables_" + id + ".html"
 }
 </script>
 </body>

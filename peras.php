@@ -5,7 +5,9 @@ if (isset($_GET['asn'])){
   $asn = $_GET['asn'];
 }
 ?>
+<html lang="en">
 <head>
+<META HTTP-EQUIV="Pragma" CONTENT="no-cache"> 
 <title>RPKI Dashboard</title>
 <link href="bootstrap/css/bootstrap.min.css" rel="stylesheet">
 <link href="bootstrap/css/bootstrap-responsive.min.css" rel="stylesheet">
@@ -17,13 +19,14 @@ google.load('visualization', '1', {packages: ['corechart']});
 if (isset($asn)){
 newpichartperas($asn, 'V','I%','U', 'Valid', 'Invalid', 'Unknown', 'Percentages of (in)valid traffic', 'Chart1');
 newpichartperas($asn, 'IA', 'IP', 'IQ', 'Invalid AS', 'Invalid Prefix (Fixed length mismatch)', 'Invalid Prefix (Range length exceeded)', 'Cause of invalids', 'Chart2', 'IB', 'AS & Prefix mismatch', 'V', 'Valid'); 
-newlinechart('V', 'I%', 'Title', 'Chart3', $asn, '%', 'Valid', 'Invalid');
+newlinechart('V', 'I%', 'Amount of valid and invalid prefixes', 'Chart3', $asn, '%', 'Valid', 'Invalid');
+//newinvalidlinechart('Causes of invalids', 'Chart4', $asn);
 }
 ?>
 </script>
 </head>
 <body data-target="#navparent" data-offset="40" data-spy="scroll">
-
+<div id='wrap'>
   <!-- Navbar stuff
   =================================================== -->
   <?php
@@ -32,12 +35,9 @@ newlinechart('V', 'I%', 'Title', 'Chart3', $asn, '%', 'Valid', 'Invalid');
 
   <!-- Header stuff
   =================================================== -->
-  <header class="jumbotron subhead" id="overview">
-  <div class="container">
-    <h1>RPKI Dashboard</h1>
-    <p class="lead">Stuffs</p>
-  </div>
-  </header>
+  <?php
+  include 'include/header.php';
+  ?>
 
   <!-- Body stuff
   =================================================== -->
@@ -77,7 +77,8 @@ newlinechart('V', 'I%', 'Title', 'Chart3', $asn, '%', 'Valid', 'Invalid');
             
             if (query_totals_peras('I%', $asn) != 0){
             echo "<div id='Chart2'></div>
-		<div id='Chart3'></div></section>";
+		<div id='Chart3'></div>
+    <div id='Chart4'></div></section>";
             };
   echo "<div id='dat_table'>";
 	newtable($asn);  
@@ -87,6 +88,21 @@ newlinechart('V', 'I%', 'Title', 'Chart3', $asn, '%', 'Valid', 'Invalid');
             ?>
     </div>
   </div>
+  <div id='push'></div>
+</div>
+
+<footer class="footer">
+  <div class="container">
+    <?php include 'include/footer.php';?>
+  </div>
+</footer>
+  <div id="waitpopup" class="modal hide fade" tabindex="-1" role="dialog" aria-labelledby="Label" aria-hidden="true">
+  <div class="modal-header">
+    <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+    <h1>Please wait</h1>
+  </div>
+  <div class="modal-body"><div class="alert alert-info">The following page is generated on-the-fly, so it may take some time to load.</div></div>
+</div>
 <script type="text/javascript" src="bootstrap/js/jquery-1.10.1.min.js"></script>
 <script type="text/javascript" src="bootstrap/js/bootstrap.min.js"></script>
 <script class="jsbin" src="bootstrap/js/jquery.dataTables.nightly.js"></script>
@@ -104,6 +120,7 @@ $(document).ready(function() {
 
         },
         updater: function (item) {
+            $('#waitpopup').modal('show');
             document.location = "peras.php?asn=" + encodeURIComponent(item);
             return item;
         }

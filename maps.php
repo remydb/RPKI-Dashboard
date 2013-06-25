@@ -2,7 +2,9 @@
 <?php
 require ('include/functions.php');
 ?>
+<html lang="en">
 <head>
+<META HTTP-EQUIV="Pragma" CONTENT="no-cache"> 
 <title>RPKI Dashboard</title>
 <link href="bootstrap/css/bootstrap.css" rel="stylesheet">
 <link href="bootstrap/css/bootstrap-responsive.css" rel="stylesheet">
@@ -18,7 +20,7 @@ newgeochart('U', 'Unknown routes per country', 'Chart3');
 </script>
 </head>
 <body data-target="#navparent" data-offset="40" data-spy="scroll">
-
+<div id='wrap'>
   <!-- Navbar stuff
   =================================================== -->
   <?php
@@ -27,12 +29,9 @@ newgeochart('U', 'Unknown routes per country', 'Chart3');
 
   <!-- Header stuff
   =================================================== -->
-  <header class="jumbotron subhead" id="overview">
-  <div class="container">
-    <h1>RPKI Dashboard</h1>
-    <p class="lead">Stuffs</p>
-  </div>
-  </header>
+  <?php
+  include 'include/header.php';
+  ?>
 
   <!-- Body stuff
   =================================================== -->
@@ -75,6 +74,14 @@ newgeochart('U', 'Unknown routes per country', 'Chart3');
       </div>
     </div>
   </div>
+  <div id='push'></div>
+</div>
+
+<footer class="footer">
+  <div class="container">
+    <?php include 'include/footer.php';?>
+  </div>
+</footer>
 <script type="text/javascript" src="bootstrap/js/jquery-1.10.1.min.js"></script>
 <script type="text/javascript" src="bootstrap/js/bootstrap.min.js"></script>
 </body>

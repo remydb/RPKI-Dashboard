@@ -5,7 +5,9 @@ if (isset($_GET['rir'])){
   $rir = $_GET['rir'];
 }
 ?>
+<html lang="en">
 <head>
+<META HTTP-EQUIV="Pragma" CONTENT="no-cache"> 
 <title>RPKI Dashboard</title>
 <link href="bootstrap/css/bootstrap.css" rel="stylesheet">
 <link href="bootstrap/css/bootstrap-responsive.css" rel="stylesheet">
@@ -17,14 +19,15 @@ google.load('visualization', '1', {packages: ['corechart']});
 if (isset($rir)){
   newpichartperrir($rir, 'V','I%','U', 'Valid', 'Invalid', 'Unknown', 'Percentages of invalid traffic', 'Chart1');
   newpichartperrir($rir, 'IA', 'IP', 'IQ', 'Invalid AS', 'Invalid Prefix (Fixed length mismatch)', 'Invalid Prefix (Range length exceeded)', 'Cause of invalids', 'Chart2', 'IB', 'AS & Prefix mismatch', 'V', 'Valid'); 
-  newlinechart('V', 'I%', 'Title', 'Chart3', '%', $rir);
+  newlinechart('V', 'I%', 'Amount of valid and invalid prefixes', 'Chart3', '%', $rir, 'Valid', 'Invalid');
+  newinvalidlinechart('Causes of invalids', 'Chart4', '%', $rir);
 }?>
 </script>
 <script>
 </script>
 </head>
 <body data-target="#navparent" data-offset="40" data-spy="scroll">
-
+<div id='wrap'>
   <!-- Navbar stuff
   =================================================== -->
   <?php
@@ -33,12 +36,9 @@ if (isset($rir)){
 
   <!-- Header stuff
   =================================================== -->
-  <header class="jumbotron subhead" id="overview">
-  <div class="container">
-    <h1>RPKI Dashboard</h1>
-    <p class="lead">Stuffs</p>
-  </div>
-  </header>
+  <?php
+  include 'include/header.php';
+  ?>
 
   <!-- Body stuff
   =================================================== -->
@@ -58,7 +58,6 @@ if (isset($rir)){
         <!-- RIR list
         ============================================= -->
          <div class="well">Select a RIR below to view the corresponding charts:</div>
-	<div class="alert alert-error"><button type="button" class="close" data-dismiss="alert">&times;</button>Loading the new page might take a few seconds because graphs are generated on demand, <b>please wait.</b></div>   
 	<select name="rir" [B] onChange="Refresh(this.value)"[/B]>
             <option> </option>
             <option value='afrinic'>AFRINIC</option>
@@ -84,7 +83,8 @@ if (isset($rir)){
                     
                     if (query_totals_per_rir('I%', $rir) != 0){
                     echo "<div id='Chart2'></div>
-            <div id='Chart3'></div></section>";
+            <div id='Chart3'></div>
+            <div id='Chart4'></div></section>";
                     };
           echo "</div>";
         }
@@ -99,6 +99,14 @@ if (isset($rir)){
 	</section>
       </div>
     </div>
+<div id='push'></div>
+</div>
+
+<footer class="footer">
+  <div class="container">
+    <?php include 'include/footer.php';?>
+  </div>
+</footer>
 <script type="text/javascript" src="bootstrap/js/jquery-1.10.1.min.js"></script>
 <script type="text/javascript" src="bootstrap/js/bootstrap.min.js"></script>
 <script class="jsbin" src="bootstrap/js/jquery.dataTables.nightly.js"></script>
@@ -111,7 +119,7 @@ $(document).ready(function() {
     } );
 });
 function Refresh(id){
-location.href="perrir.php?rir=" + id
+location.href=id + ".html"
 }
 </script>
 </body>

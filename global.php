@@ -8,7 +8,9 @@ $varvalid = query_total_prefixes('V');
 $varvalidation = $vartotal - $varunknown;
 $varpercent = round($varvalidation / $vartotal * 100, 2);
 ?>
+<html lang="en">
 <head>
+<META HTTP-EQUIV="Pragma" CONTENT="no-cache"> 
 <title>RPKI Dashboard</title>
 <link href="bootstrap/css/bootstrap.css" rel="stylesheet">
 <link href="bootstrap/css/bootstrap-responsive.css" rel="stylesheet">
@@ -23,7 +25,7 @@ newpichart2('IA', 'IP', 'IQ', 'IB', 'V', 'Invalid AS', 'Invalid Prefix (Fixed le
 </script>
 </head>
 <body data-target="#navparent" data-offset="40" data-spy="scroll">
-
+<div id='wrap'>
   <!-- Navbar stuff
   =================================================== -->
   <?php
@@ -32,12 +34,9 @@ newpichart2('IA', 'IP', 'IQ', 'IB', 'V', 'Invalid AS', 'Invalid Prefix (Fixed le
 
   <!-- Header stuff
   =================================================== -->
-  <header class="jumbotron subhead" id="overview">
-  <div class="container">
-    <h1>RPKI Dashboard</h1>
-    <p class="lead">Stuffs</p>
-  </div>
-  </header>
+  <?php
+  include 'include/header.php';
+  ?>
 
   <!-- Body stuff
   =================================================== -->
@@ -83,12 +82,20 @@ is shown in the <strong>pie chart below.</strong></div>
       </div>
     </div>
   </div>
+    <div id='push'></div>
+</div>
+
+    <footer class="footer">
+      <div class="container">
+        <?php include 'include/footer.php';?>
+      </div>
+    </footer>
 <div id="waitpopup" class="modal hide fade" tabindex="-1" role="dialog" aria-labelledby="Label" aria-hidden="true">
   <div class="modal-header">
     <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
     <h1>Please wait</h1>
   </div>
-  <div class="modal-body"><div class="alert alert-info">The following page is generated on-the-fly, so it may take some time to load.</div></div>
+  <div class="modal-body"><div class="alert alert-info">The following page is relatively large, so it may take some time to load.</div></div>
 </div>
 <script type="text/javascript" src="bootstrap/js/jquery-1.10.1.min.js"></script>
 <script type="text/javascript" src="bootstrap/js/bootstrap.min.js"></script>

@@ -169,7 +169,7 @@ function newpichart($a, $b, $c, $lega, $legb, $legc, $title, $chart, $ipver = '%
             ]);
 
             // Create and draw the visualization.
-            var options = {'title':'$title','width':800,'height':600,'is3D':1};
+            var options = {'title':'$title','width':600,'height':600,'is3D':1};
 
             var chart = new google.visualization.PieChart(document.getElementById('$chart'));
             chart.draw(data, options);
@@ -192,7 +192,7 @@ function newpichart($a, $b, $c, $lega, $legb, $legc, $title, $chart, $ipver = '%
                 }
                 else {
                     $('#waitpopup').modal('show');
-                    window.location.href='http://academic.slowpoke.nl/validitytables.php?v=' + str.substr(0,1) + '%';
+                    window.location.href='http://academic.slowpoke.nl/validitytables_' + str.substr(0,1) + '.html';
                 }                  
             }
 
@@ -226,7 +226,7 @@ function newpichart2($a, $b, $c, $d, $e, $lega, $legb, $legc, $legd, $lege, $tit
         ]);
 
         // Create and draw the visualization.
-        var options = {'title':'$title','width':800,'height':600,'is3D':1};
+        var options = {'title':'$title','width':600,'height':600,'is3D':1};
         var chart = new google.visualization.PieChart(document.getElementById('$chart'));
         chart.draw(data, options);
 
@@ -261,7 +261,7 @@ function newpichart2($a, $b, $c, $d, $e, $lega, $legb, $legc, $legd, $lege, $tit
                     var validity = 'V';
                 }
                 $('#waitpopup').modal('show');
-                window.location.href='http://academic.slowpoke.nl/validitytables.php?v=' + validity;               
+                window.location.href='http://academic.slowpoke.nl/validitytables_' + validity + '.html';               
             }
 
             if (location.pathname.substring(1) == 'global.html' || location.pathname.substring(1) == 'global.php'){
@@ -478,7 +478,7 @@ function newrirbarchart($RIR, $chart){
         }
 
         $mysqli->close();
-        
+        $lowercase = strtolower($RIR);
         //foreach ($stack as $v){
     //print "'$v', ";
     //} 
@@ -510,17 +510,14 @@ function newrirbarchart($RIR, $chart){
         
         var chart = new google.visualization.BarChart(document.getElementById('$chart'));
         chart.draw(data, options);
+    ";
 
-        google.visualization.events.addListener(chart, 'select', selectHandler);
+    print "google.visualization.events.addListener(chart, 'select', selectHandler);
 
         function selectHandler(e) {
-            var selection = chart.getSelection()[0];
-            var label = data.getColumnLabel(selection.column);
-            if (label.substr(0,2) == 'AS'){
-                window.location.replace('http://academic.slowpoke.nl/peras.php?asn=' + label.substr(2).split(' ')[0]);
-            }
+            location.href='http://academic.slowpoke.nl/$lowercase.html';
         }
-      }";
+      };\n";
 }
 
 function newlinechart($validity, $validity2, $title, $chart, $as, $rir = '%', $lega, $legb){
@@ -596,54 +593,109 @@ function newlinechart($validity, $validity2, $title, $chart, $as, $rir = '%', $l
       }";
 }
 
-function getrelroa($prefix)
-{
+function newinvalidlinechart($title, $chart, $as = '%', $rir = '%'){
+        
+    //Dirty way to create an array with dates of last 7 days
+    //Should consider using dateperiod/dateinterval instead
+    //Or even query database for all previous tables
+    //And add each found one to the array
+    $daterange = array();
+    $daterange[0] = date("d-m-y", time()-604800)."_routes"; //7 days ago  
+    $daterange[1] = date("d-m-y", time()-518400)."_routes"; //6 days ago
+    $daterange[2] = date("d-m-y", time()-432000)."_routes"; //5 days ago
+    $daterange[3] = date("d-m-y", time()-345600)."_routes"; //4 days ago
+    $daterange[4] = date("d-m-y", time()-259200)."_routes"; //3 days ago
+    $daterange[5] = date("d-m-y", time()-172800)."_routes"; //2 days ago      
+    $daterange[6] = date("d-m-y", time()-86400)."_routes";  //yesterday
+    $daterange[7] = date("d-m-y")."_routes";  //today
+
     $mysqli = mySQLi();
-    $query = "SELECT VRP FROM `".$GLOBALS['date']."` WHERE `Prefix` = ?";
 
-    if (!($stmt = $mysqli->prepare($query))) {
-        echo "Prepare failed: (" . $mysqli->errno . ") " . $mysqli->error;
-    }
-    $stmt->bind_param("s", $prefix);
-    if (!$stmt->execute()) {
-         echo "Execute failed: (" . $stmt->errno . ") " . $stmt->error;
-    }
-    $stmt->bind_result($item);
-    //$a = "";
-    while ($stmt->fetch())
-    {
-        $a = $item;
-    }
-    $stmt->close();
-    $roas = explode(',', $a);
-    $output = "<table ><tr><td>AS</td><td>Prefix</td><td>Max length</td></tr>";
-    //$output = "AS\tPrefix\tMax Length\n";
-    foreach ($roas as $roa)
-    {
-        if ($roa != ''){
-            $query = "SELECT ASN, IP_Prefix, Max_Length FROM `".$GLOBALS['vrptable']."` WHERE `IP_Prefix` = ?";
-
-            if (!($stmt = $mysqli->prepare($query))) {
-                echo "Prepare failed: (" . $mysqli->errno . ") " . $mysqli->error;
-            }
-            $stmt->bind_param("s", $prefix);
-            if (!$stmt->execute()) {
-                 echo "Execute failed: (" . $stmt->errno . ") " . $stmt->error;
-            }
-            $stmt->bind_result($x, $y, $z);
-            while ($stmt->fetch())
-            {
-                $roaasn = $x;
-                $roaprefix = $y;
-                $roamaxlen = $z;
-            }
-            $stmt->close();
-            $output .= "<tr><td>$roaasn</td><td>$roaprefix</td><td>$roamaxlen</td></tr>";
+    $stack = array();
+    foreach ($daterange as $xdate){
+        $query = "SELECT COUNT(*) 
+            FROM `$xdate` 
+            WHERE Validity LIKE 'IA' AND ASN LIKE '$as' AND RIR like '$rir'";
+            //echo $query.'\n';
+        if ($result = $mysqli->query($query))
+        {
+            //echo "Query failed: (" . $mysqli->errno . ") " . $mysqli->error;
+            $row = $result->fetch_row();
+            $stack[$xdate] = $row[0];
         }
+        
     }
+        
+    $stack2 = array();
+        foreach ($daterange as $xdate){
+                $query = "SELECT COUNT(*)
+                    FROM `$xdate`
+                    WHERE Validity LIKE 'IP' AND ASN LIKE '$as' AND RIR like '$rir'";
+                    //echo $query.'\n';
+                if ($result = $mysqli->query($query))
+                {
+                    //echo "Query failed: (" . $mysqli->errno . ") " . $mysqli->error;
+                                $row = $result->fetch_row();
+                        $stack2[$xdate] = $row[0];
+                }
+
+        }
+
+    $stack3 = array();
+        foreach ($daterange as $xdate){
+                $query = "SELECT COUNT(*)
+                    FROM `$xdate`
+                    WHERE Validity LIKE 'IQ' AND ASN LIKE '$as' AND RIR like '$rir'";
+                    //echo $query.'\n';
+                if ($result = $mysqli->query($query))
+                {
+                    //echo "Query failed: (" . $mysqli->errno . ") " . $mysqli->error;
+                                $row = $result->fetch_row();
+                        $stack3[$xdate] = $row[0];
+                }
+
+        }
+
+    $stack4 = array();
+        foreach ($daterange as $xdate){
+                $query = "SELECT COUNT(*)
+                    FROM `$xdate`
+                    WHERE Validity LIKE 'IB' AND ASN LIKE '$as' AND RIR like '$rir'";
+                    //echo $query.'\n';
+                if ($result = $mysqli->query($query))
+                {
+                    //echo "Query failed: (" . $mysqli->errno . ") " . $mysqli->error;
+                                $row = $result->fetch_row();
+                        $stack4[$xdate] = $row[0];
+                }
+
+        }
+
     $mysqli->close();
-    $output .= "</table>";
-    return $output;
+        
+
+    print "google.setOnLoadCallback(draw$chart);
+        function draw$chart() {
+        var data = google.visualization.arrayToDataTable([
+          ['Date','Invalid ASN', 'Invalid Prefix (Fixed length mismatch)', 'Invalid Prefix (Range length exceeded)', 'Invalid ASN & Prefix'],";
+
+         $keys = array_keys($stack);
+         foreach ($keys as $key){
+            echo "['".explode("_", $key)[0]."',".$stack[$key].", ".$stack2[$key].", ".$stack3[$key].", ".$stack4[$key]."],";
+         }
+
+        echo "]);
+
+        // Create and draw the visualization.
+        var options = {
+        title: '$title',
+        width: 800,
+        height: 500,
+        };
+        
+        var chart = new google.visualization.LineChart(document.getElementById('$chart'));
+        chart.draw(data, options);
+      }";
 }
 
 function newtable($as){
@@ -804,7 +856,7 @@ function rirtable(){
 
             $adop = round(($total-$unknown)/$total*100,2);
             $lowercase = strtolower($value);
-            print "<tr><td><a href='perrir.php?rir=$lowercase'>$value</a></td>
+            print "<tr><td><a href='$lowercase.html'>$value</a></td>
             <td><span class=\"label label-info\">$total (100%)</span></td>
             <td><span class=\"label label-success\">$valid ($validper%)</span></td>
             <td><span class=\"label label-important\">$invalid ($invalidper%)</span></td>

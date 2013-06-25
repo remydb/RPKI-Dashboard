@@ -1,12 +1,14 @@
 <!DOCTYPE html>
+<html lang="en">
 <head>
+<META HTTP-EQUIV="Pragma" CONTENT="no-cache"> 
 <title>RPKI Dashboard</title>
 <link href="bootstrap/css/bootstrap.css" rel="stylesheet">
 <link href="bootstrap/css/bootstrap-responsive.css" rel="stylesheet">
 <link href="bootstrap/css/custom.css" rel="stylesheet">
 </head>
 <body>
-
+<div id='wrap'>
   <!-- Navbar stuff 
   =================================================== -->
   <?php
@@ -15,12 +17,9 @@
 
   <!-- Header stuff
   =================================================== -->
-  <header class="jumbotron subhead" id="overview">
-  <div class="container">
-    <h1>RPKI Dashboard</h1>
-    <p class="lead">Stuffs</p>
-  </div>
-  </header>
+  <?php
+  include 'include/header.php';
+  ?>
 
   <!-- Body stuff
   =================================================== -->
@@ -43,6 +42,15 @@
 	</div>
     </div>
   </div>
+</div>
+  <div id='push'></div>
+</div>
+
+    <footer class="footer">
+      <div class="container">
+        <?php include 'include/footer.php';?>
+      </div>
+    </footer>
 <script src="bootstrap/js/bootstrap.js"></script>
 </body>
 </html>
