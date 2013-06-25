@@ -6,7 +6,7 @@ $vrptable = date("d-m-y", time()-$threehours)."_vrp";
 
 function mySQLi()
 {
-    $mysqli = new mysqli("localhost", "root", "noedelsoep", "bgp");
+    $mysqli = new mysqli("localhost", "username", "password", "bgp");
     if ($mysqli->connect_errno) {
         echo "Failed to connect to MySQL: (" . $mysqli->connect_errno . ") " . $mysqli->connect_error;
     }
@@ -192,7 +192,7 @@ function newpichart($a, $b, $c, $lega, $legb, $legc, $title, $chart, $ipver = '%
                 }
                 else {
                     $('#waitpopup').modal('show');
-                    window.location.href='http://academic.slowpoke.nl/validitytables_' + str.substr(0,1) + '.html';
+                    location.href='validitytables_' + str.substr(0,1) + '.html';
                 }                  
             }
 
@@ -261,7 +261,7 @@ function newpichart2($a, $b, $c, $d, $e, $lega, $legb, $legc, $legd, $lege, $tit
                     var validity = 'V';
                 }
                 $('#waitpopup').modal('show');
-                window.location.href='http://academic.slowpoke.nl/validitytables_' + validity + '.html';               
+                window.location.href='validitytables_' + validity + '.html';               
             }
 
             if (location.pathname.substring(1) == 'global.html' || location.pathname.substring(1) == 'global.php'){
@@ -432,7 +432,7 @@ function newbarchart($type, $validity, $title, $group, $chart, $amount){
             var label = data.getColumnLabel(selection.column);
             if (label.substr(0,2) == 'AS'){
                 $('#waitpopup').modal('show');
-                window.location.href='http://academic.slowpoke.nl/peras.php?asn=' + label.substr(2).split(' ')[0];
+                window.location.href='peras.php?asn=' + label.substr(2).split(' ')[0];
             }
         }
       }";
@@ -515,7 +515,7 @@ function newrirbarchart($RIR, $chart){
     print "google.visualization.events.addListener(chart, 'select', selectHandler);
 
         function selectHandler(e) {
-            location.href='http://academic.slowpoke.nl/$lowercase.html';
+            location.href='$lowercase.html';
         }
       };\n";
 }
