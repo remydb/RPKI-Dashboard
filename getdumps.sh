@@ -28,15 +28,15 @@ chown mysql:mysql {riswhoisdump.IPv4,riswhoisdump.IPv6}
 cp {riswhoisdump.IPv4,riswhoisdump.IPv6,export.csv} /var/lib/mysql/bgp/
 
 #Rename old database tables
-mysql -u root -pnoedelsoep bgp -e "rename table today_vrp to \``date -d yesterday +%d-%m-%y`_vrp\`"
-mysql -u root -pnoedelsoep bgp -e "rename table today_routes to \``date -d yesterday +%d-%m-%y`_routes\`"
+#mysql -u root -pnoedelsoep bgp -e "rename table today_vrp to \``date -d yesterday +%d-%m-%y`_vrp\`"
+#mysql -u root -pnoedelsoep bgp -e "rename table today_routes to \``date -d yesterday +%d-%m-%y`_routes\`"
 
 #Debug stuff
-#mysql -u root -pnoedelsoep bgp -e "DROP TABLE \`today_vrp\`"
-#mysql -u root -pnoedelsoep bgp -e "DROP TABLE \`today_routes\`"
+mysql -u root -pnoedelsoep bgp -e "DROP TABLE \``date +%d-%m-%y`_vrp\`"
+mysql -u root -pnoedelsoep bgp -e "DROP TABLE \``date +%d-%m-%y`_routes\`"
 
 #Create new database tables
-mysql -u root -pnoedelsoep bgp -e "CREATE TABLE \`today_vrp\` ( 
+mysql -u root -pnoedelsoep bgp -e "CREATE TABLE \``date +%d-%m-%y`_vrp\` ( 
        id INT NOT NULL AUTO_INCREMENT,
        ASN INT(10), 
        IP_Prefix VARCHAR(43), 
@@ -44,7 +44,7 @@ mysql -u root -pnoedelsoep bgp -e "CREATE TABLE \`today_vrp\` (
        bin VARCHAR(128), 
        PRIMARY KEY (ASN, IP_Prefix, Max_Length),
        INDEX (id));"
-mysql -u root -pnoedelsoep bgp -e "CREATE TABLE \`today_routes\` (
+mysql -u root -pnoedelsoep bgp -e "CREATE TABLE \``date +%d-%m-%y`_routes\` (
 	ASN INT(10),
 	Prefix VARCHAR(43),
 	Validity VARCHAR(2),
@@ -58,9 +58,9 @@ mysql -u root -pnoedelsoep bgp -e "CREATE TABLE \`today_routes\` (
 sleep 1
 
 #Start pumping everything into the database
-mysql -u root -pnoedelsoep bgp -e "load data infile 'riswhoisdump.IPv4' into table \`today_routes\` columns terminated by ',' (ASN,Prefix,Validity,Country,VRP,IPver,Bin);"
-mysql -u root -pnoedelsoep bgp -e "load data infile 'riswhoisdump.IPv6' into table \`today_routes\` columns terminated by ',' (ASN,Prefix,Validity,Country,VRP,IPver,Bin);"
-mysql -u root -pnoedelsoep bgp -e "load data infile 'export.csv' into table \`today_vrp\` columns terminated by ',' (ASN, \`IP_Prefix\`, \`Max_Length\`, bin) SET id = NULL;"
+mysql -u root -pnoedelsoep bgp -e "load data infile 'riswhoisdump.IPv4' into table \``date +%d-%m-%y`_routes\` columns terminated by ',' (ASN,Prefix,Validity,RIR,VRP,IPver,Bin);"
+mysql -u root -pnoedelsoep bgp -e "load data infile 'riswhoisdump.IPv6' into table \``date +%d-%m-%y`_routes\` columns terminated by ',' (ASN,Prefix,Validity,RIR,VRP,IPver,Bin);"
+mysql -u root -pnoedelsoep bgp -e "load data infile 'export.csv' into table \``date +%d-%m-%y`_vrp\` columns terminated by ',' (ASN, \`IP_Prefix\`, \`Max_Length\`, bin) SET id = NULL;"
 
 python validate_table.py
 
@@ -73,3 +73,9 @@ paste --delimiter=' ' row1 row2 > rirs
 rm row1 row2
 
 python insertrirs.py
+
+curl http://localhost/perrir.php > /var/www/perrir.html
+curl http://localhost/maps.php > /var/www/maps.html
+curl http://localhost/trends.php > /var/www/trends.html
+curl http://localhost/global.php > /var/www/global.html
+curl http://localhost/top10.php > /var/www/top10.html
