@@ -76,8 +76,7 @@ newrirbarchart('RIPE', 'Chart7');
           <div class="page-header">
             <h1>Breakdown per RIR</h1>
 	        </div>
-          <div class="well">The following charts show an overview of the autonomous systems that 
-          announced the <strong>most invalidated prefixes</strong>.</div>
+          <div class="well">The following charts show an overview of <strong>valid and invalid prefixes for each RIR</strong>.</div>
         <div id="Chart3"></div>
         <div id="Chart4"></div>
         <div id="Chart5"></div>
