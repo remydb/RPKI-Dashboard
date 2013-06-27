@@ -11,7 +11,7 @@ import string
 from time import gmtime, strftime
 
 #Set up database connection
-connection=mdb.connect('localhost', 'root', 'noedelsoep', 'bgp') #Don't worry, not a real password
+connection=mdb.connect('localhost', 'username', 'password', 'bgp') #Don't worry, not a real password
 cursor=connection.cursor()
 
 #Retrieve VRP
