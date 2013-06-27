@@ -64,10 +64,18 @@ python validate_table.py
 
 wget -N http://www.iana.org/assignments/ipv4-address-space/ipv4-address-space.txt
 
-#Our solution is bad and we should feel bad
 grep -Eo "whois.*.net" ipv4-address-space.txt | cut -d '.' -f2 > row2
 grep whois.*.net ipv4-address-space.txt | grep -oE "[0-9]{3}/8" | cut -d '/' -f1 | sed -E 's/^0*//' > row1
 paste --delimiter=' ' row1 row2 > rirs
 rm row1 row2
 
+wget -N http://www.iana.org/assignments/ipv6-unicast-address-assignments/ipv6-unicast-address-assignments.txt
+
+grep -Eo "whois.*.net" ipv6-unicast-address-assignments.txt | cut -d '.' -f2 > row2
+grep whois.*.net ipv6-unicast-address-assignments.txt | awk '{print $1}' > row1
+paste --delimiter=' ' row1 row2 > rirs-ipv6
+rm row1 row2
+
 python insertrirs.py
+
+rm riswhoisdump.IPv{4,6} rirs rirs-ipv6 export.csv
