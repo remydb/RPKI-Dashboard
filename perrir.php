@@ -73,8 +73,8 @@ if (isset($rir)){
         <!-- Per AS
         ============================================= -->
         <?php
-          $upperrir = strtoupper($rir);
           if (isset($rir)){
+          $upperrir = strtoupper($rir);
             echo "<section id='charts'>
                   <div class='page-header'>
                     <h1>Charts for $upperrir</h1>
