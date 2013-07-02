@@ -82,11 +82,13 @@ if (isset($rir)){
                   <div id='Chart1'></div>";
                     
                     if (query_totals_per_rir('I%', $rir) != 0){
-                    echo "<div id='Chart2'></div>
-            <div id='Chart3'></div>
-            <div id='Chart4'></div></section>";
+                      echo "<div id='Chart2'></div>
+                        <div id='Chart3'></div>
+                        <div id='Chart4'></div></section>";
+                      echo "<div><h1>All invalid prefixes for $upperrir</h1>";
+                      newtableperrir($rir);
                     };
-          echo "</div>";
+          echo "</div></div>";
         }
         else{
           echo "<div class='page-header'>
@@ -113,6 +115,31 @@ if (isset($rir)){
 <script type="text/javascript" src="bootstrap/js/DT_bootstrap.js"></script>
 <script type="text/javascript">
 $(document).ready(function() {
+     $('.btn').each(function() {
+      $(this).click(function(){
+        var el = $(this);
+      var isVisible = $(this).next('div.popover:visible').length;
+      if (!isVisible){
+      $.ajax({
+        type: "POST",
+        url: 'getroalist2.php',
+        data: {p: this.id},
+        success: function(data) {
+          el.attr('data-content', data);
+          el.popover({
+            placement: 'top',
+            html: true,
+            trigger: 'manual'
+          });
+          el.popover('toggle');
+        }
+      });}
+      else{
+        el.popover('toggle');
+      }
+      });
+      
+    });
     $('#pagetable').dataTable( {
 
       "sPaginationType": "bootstrap"

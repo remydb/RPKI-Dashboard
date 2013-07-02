@@ -207,7 +207,7 @@ function newpichart2($a, $b, $c, $d, $e, $lega, $legb, $legc, $legd, $lege, $tit
         $varb = query_totals($b, $ipver);
         $varc = query_totals($c, $ipver);
         $vard = query_totals($d, $ipver); 
-	$vare = query_totals($e);    
+	$vare = query_totals($e, $ipver);    
 	$total = $vara + $varb + $varc + $vard + $vare;
         $pera = round($vara / $total * 100, 2);
         $perb = round($varb / $total * 100, 2);
@@ -525,14 +525,29 @@ function newlinechart($validity, $validity2, $title, $chart, $as, $rir = '%', $l
         //Dirty way to create an array with dates of last 7 days
         //Should consider using dateperiod/dateinterval instead
         $daterange = array();
-        $daterange[0] = date("d-m-y", time()-604800)."_routes"; //7 days ago  
-        $daterange[1] = date("d-m-y", time()-518400)."_routes"; //6 days ago
-        $daterange[2] = date("d-m-y", time()-432000)."_routes"; //5 days ago
-        $daterange[3] = date("d-m-y", time()-345600)."_routes"; //4 days ago
-        $daterange[4] = date("d-m-y", time()-259200)."_routes"; //3 days ago
-        $daterange[5] = date("d-m-y", time()-172800)."_routes"; //2 days ago      
-        $daterange[6] = date("d-m-y", time()-86400)."_routes";  //yesterday
-        $daterange[7] = date("d-m-y")."_routes";  //today
+        // $daterange[0] = date("d-m-y", time()-604800)."_routes"; //7 days ago  
+        // $daterange[1] = date("d-m-y", time()-518400)."_routes"; //6 days ago
+        // $daterange[2] = date("d-m-y", time()-432000)."_routes"; //5 days ago
+        // $daterange[3] = date("d-m-y", time()-345600)."_routes"; //4 days ago
+        // $daterange[4] = date("d-m-y", time()-259200)."_routes"; //3 days ago
+        // $daterange[5] = date("d-m-y", time()-172800)."_routes"; //2 days ago      
+        // $daterange[6] = date("d-m-y", time()-86400)."_routes";  //yesterday
+        // $daterange[7] = date("d-m-y")."_routes";  //today
+
+    $daterange[0] = date("d-m-y", time()-1123200)."_routes"; //7 days ago  
+    $daterange[1] = date("d-m-y", time()-1036800)."_routes"; //6 days ago
+    $daterange[2] = date("d-m-y", time()-950400)."_routes"; //5 days ago
+    $daterange[3] = date("d-m-y", time()-864000)."_routes"; //4 days ago
+    $daterange[4] = date("d-m-y", time()-777600)."_routes"; //3 days ago
+    $daterange[5] = date("d-m-y", time()-691200)."_routes"; //2 days ago
+    $daterange[6] = date("d-m-y", time()-604800)."_routes"; //7 days ago  
+    $daterange[7] = date("d-m-y", time()-518400)."_routes"; //6 days ago
+    $daterange[8] = date("d-m-y", time()-432000)."_routes"; //5 days ago
+    $daterange[9] = date("d-m-y", time()-345600)."_routes"; //4 days ago
+    $daterange[10] = date("d-m-y", time()-259200)."_routes"; //3 days ago
+    $daterange[11] = date("d-m-y", time()-172800)."_routes"; //2 days ago      
+    $daterange[12] = date("d-m-y", time()-86400)."_routes";  //yesterday
+    $daterange[13] = date("d-m-y")."_routes";  //today
 
         $mysqli = mySQLi();
 
@@ -600,14 +615,29 @@ function newinvalidlinechart($title, $chart, $as = '%', $rir = '%'){
     //Or even query database for all previous tables
     //And add each found one to the array
     $daterange = array();
-    $daterange[0] = date("d-m-y", time()-604800)."_routes"; //7 days ago  
-    $daterange[1] = date("d-m-y", time()-518400)."_routes"; //6 days ago
-    $daterange[2] = date("d-m-y", time()-432000)."_routes"; //5 days ago
-    $daterange[3] = date("d-m-y", time()-345600)."_routes"; //4 days ago
-    $daterange[4] = date("d-m-y", time()-259200)."_routes"; //3 days ago
-    $daterange[5] = date("d-m-y", time()-172800)."_routes"; //2 days ago      
-    $daterange[6] = date("d-m-y", time()-86400)."_routes";  //yesterday
-    $daterange[7] = date("d-m-y")."_routes";  //today
+    // $daterange[0] = date("d-m-y", time()-604800)."_routes"; //7 days ago  
+    // $daterange[1] = date("d-m-y", time()-518400)."_routes"; //6 days ago
+    // $daterange[2] = date("d-m-y", time()-432000)."_routes"; //5 days ago
+    // $daterange[3] = date("d-m-y", time()-345600)."_routes"; //4 days ago
+    // $daterange[4] = date("d-m-y", time()-259200)."_routes"; //3 days ago
+    // $daterange[5] = date("d-m-y", time()-172800)."_routes"; //2 days ago      
+    // $daterange[6] = date("d-m-y", time()-86400)."_routes";  //yesterday
+    // $daterange[7] = date("d-m-y")."_routes";  //today
+
+    $daterange[0] = date("d-m-y", time()-1123200)."_routes"; //7 days ago  
+    $daterange[1] = date("d-m-y", time()-1036800)."_routes"; //6 days ago
+    $daterange[2] = date("d-m-y", time()-950400)."_routes"; //5 days ago
+    $daterange[3] = date("d-m-y", time()-864000)."_routes"; //4 days ago
+    $daterange[4] = date("d-m-y", time()-777600)."_routes"; //3 days ago
+    $daterange[5] = date("d-m-y", time()-691200)."_routes"; //2 days ago
+    $daterange[6] = date("d-m-y", time()-604800)."_routes"; //7 days ago  
+    $daterange[7] = date("d-m-y", time()-518400)."_routes"; //6 days ago
+    $daterange[8] = date("d-m-y", time()-432000)."_routes"; //5 days ago
+    $daterange[9] = date("d-m-y", time()-345600)."_routes"; //4 days ago
+    $daterange[10] = date("d-m-y", time()-259200)."_routes"; //3 days ago
+    $daterange[11] = date("d-m-y", time()-172800)."_routes"; //2 days ago      
+    $daterange[12] = date("d-m-y", time()-86400)."_routes";  //yesterday
+    $daterange[13] = date("d-m-y")."_routes";  //today
 
     $mysqli = mySQLi();
 
@@ -733,6 +763,40 @@ function newtable($as){
                     }
             print "<tr class=\"$class\">
                     <td>".$row["Prefix"]."</td>
+                    <td>".$row["IPver"]."</td>
+                    <td>$validity</td>
+                    <td><center>$button</center></td>
+                   </tr>";
+        }
+        print "</tbody></table>";
+        /* free result set */
+        $result->free();
+        }
+}
+
+function newtableperrir($rir){
+        $mysqli = mySQLi();
+
+        $query = "SELECT *
+            FROM `".$GLOBALS['date']."`
+            WHERE RIR = '$rir'
+            AND VALIDITY LIKE 'I%'
+            GROUP BY `Prefix`";
+
+        if ($result = $mysqli->query($query)) {
+
+        /* fetch associative array */
+        print "<table class=\"table table-striped table-bordered table-hover\" id=\"pagetable\">";
+        print "<col width=\"40%\"><col width=\"15%\"><col width=\"15%\"><col width=\"15%\"><col width=\"15\">";
+        print "<thead><tr><th><b>Prefix</b></th><th><b>ASN</b></th><th><b>IP Version</b></th><th><b>Validity</b></th><th><b>Info</b></th></tr></thead><tbody>";
+        while ($row = $result->fetch_assoc()) {
+           
+            $class = "error";
+            $validity = "<span class=\"label label-important\">Invalid</span>";
+            $button = "<div class=\"btn-group\"><button class=\"btn\" id=\"".$row['Prefix']."\" rel=\"popover\" data-content=\"\">Show details</button></div>";
+            print "<tr class=\"$class\">
+                    <td>".$row["Prefix"]."</td>
+                    <td>".$row["ASN"]."</td>
                     <td>".$row["IPver"]."</td>
                     <td>$validity</td>
                     <td><center>$button</center></td>
