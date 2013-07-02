@@ -23,6 +23,7 @@ To set up the dashboard, perform the following steps:
   * insertrirs.py
   * validate_table.py
 * Grab the files from the 'dashboard' branch and place them in your website root (or where ever you want them to be)
+ * Edit the 'include/functions.php' file and change the mysql username and password
 * Edit the 'createstatic.sh' file to place the static HTML files in the website root
 * Add rules to your crontab for running 'run_daily.sh' and 'createstatic.sh' every day, eg:
 
