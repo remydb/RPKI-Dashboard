@@ -22,6 +22,29 @@ while ($stmt->fetch())
 $stmt->close();
 $roas = explode(',', $a);
 
+$query = "SELECT Validity FROM `".$GLOBALS['date']."` WHERE `Prefix` = ?";
+
+if (!($stmt = $mysqli->prepare($query))) {
+    echo "Prepare failed: (" . $mysqli->errno . ") " . $mysqli->error;
+}
+$stmt->bind_param("s", $prefix);
+if (!$stmt->execute()) {
+     echo "Execute failed: (" . $stmt->errno . ") " . $stmt->error;
+}
+$stmt->bind_result($item);
+//$a = "";
+while ($stmt->fetch())
+{
+    if ($item == 'IA'){
+    $state = "AS mismatch";}
+    if ($item == 'IP'){
+    $state = "Fixed length mismatch";}
+    if ($item == 'IQ'){
+    $state = "Range length exceeded";}
+    if ($item == 'IB'){
+    $state = "Range exceeded and AS mismatch";}
+}
+$stmt->close();
 $output = "<table class=\"table table-striped table-bordered table-hover\"><thead><tr><th colspan='3'><center>ROAs</center></th></tr><tr><th>AS</th><th>Prefix</th><th>Max length</th></tr></thead><tbody>";
 //$output = "AS\tPrefix\tMax Length\n";
 foreach ($roas as $roa)
@@ -48,7 +71,7 @@ foreach ($roas as $roa)
     }
 }
 $mysqli->close();
-$output .= "</tbody></table><br/>";
+$output .= "</tbody></table><center><p><span class='label label-important'>$state</span></p></center>";
 $shellprefix = escapeshellarg($prefix);
 $shellcmd = shell_exec("/var/www/bin/whois -a $shellprefix | grep ^origin | awk '{print $2}' | tr -d 'AS'");
 $shellout = nl2br($shellcmd);
