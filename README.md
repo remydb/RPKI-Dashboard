@@ -1,7 +1,7 @@
 RPKI Dashboard
 ===
 
-This repository holds the files needed to set up an RPKI dashboard like the one hosted here: http://academic.slowpoke.nl
+This repository holds the files needed to set up an RPKI dashboard like the one hosted here: http://rpki.surfnet.nl
 
 The project consists of two parts, namely the scripts for collecting data and a web-dashboard for presenting the statistics of said data.
 
