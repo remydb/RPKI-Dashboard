@@ -64,7 +64,7 @@ if (isset($rir)){
             <option value='apnic'>APNIC</option>
             <option value='arin'>ARIN</option>
             <option value='lacnic'>LACNIC</option>
-            <option value='ripe'>RIPE</option>
+            <option value='ripe'>RIPE NCC</option>
 	</select>
         <section id="total">
         </section>
@@ -75,6 +75,9 @@ if (isset($rir)){
         <?php
           if (isset($rir)){
           $upperrir = strtoupper($rir);
+          if ($upperrir == 'RIPE'){
+            $upperrir = 'RIPE NCC';
+          }
             echo "<section id='charts'>
                   <div class='page-header'>
                     <h1>Charts for $upperrir</h1>

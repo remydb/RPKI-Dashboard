@@ -920,6 +920,9 @@ function rirtable(){
 
             $adop = round(($total-$unknown)/$total*100,2);
             $lowercase = strtolower($value);
+            if ($value == 'RIPE'){
+              $value = 'RIPE NCC';
+            }
             print "<tr><td><a href='$lowercase.html'>$value</a></td>
             <td><span class=\"label label-info\">$total (100%)</span></td>
             <td><span class=\"label label-success\">$valid ($validper%)</span></td>

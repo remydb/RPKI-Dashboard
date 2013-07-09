@@ -62,7 +62,7 @@ newrirbarchart('RIPE', 'Chart7');
           </div>
 	<div class="well">The following charts show an overview of the autonomous systems that 
           announced the <strong>most validated prefixes</strong>. These charts are generated daily using the most up to date
-          routing tables for IPv4 and IPv6 provided by <a href="http://www.ris.ripe.net/dumps/">RIPE</a>.<br />
+          routing tables for IPv4 and IPv6 provided by <a href="http://www.ris.ripe.net/dumps/">RIPE NCC</a>.<br />
           Click on a <strong>bar</strong> or <strong>legend</strong> item to view additional information
           for the corresponding AS number.</div>
 	<div id="Chart1"></div>
