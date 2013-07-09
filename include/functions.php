@@ -496,6 +496,9 @@ function newrirbarchart($RIR, $chart){
     foreach ($stack2 as $v){
                 print "$v,";
         }
+    if ($RIR == 'RIPE'){
+      $RIR = 'RIPE NCC';
+    }
     print "]
         ]);
 
