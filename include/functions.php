@@ -907,6 +907,7 @@ function rirtable(){
     <th><b>Valid</b></th>
     <th><b>Invalid</b></th>
     <th><b>Unknown</b></th>
+    <th><b>Accuracy</b></th>
     <th><b>RPKI Adoption Rate</b></th>
     </tr></thead><tbody>";
 
@@ -920,7 +921,12 @@ function rirtable(){
 
             $unknown = $total-$valid-$invalid;
             $unknownper = round($unknown/$total*100,2);
-
+            if ($valid>0) {
+               $accuracy = round($valid/($valid/$invalid)*100,2)
+            }
+            else {
+               $accuracy = 0;
+            }
             $adop = round(($total-$unknown)/$total*100,2);
             $lowercase = strtolower($value);
             if ($value == 'RIPE'){
@@ -931,6 +937,7 @@ function rirtable(){
             <td><span class=\"label label-success\">$valid ($validper%)</span></td>
             <td><span class=\"label label-important\">$invalid ($invalidper%)</span></td>
             <td><span class=\"label label-warning\">$unknown ($unknownper%)</span></td>
+            <td><span class=\"label label-inverse\">$accuracy%</span></td>
             <td><span class=\"label label-inverse\">$adop%</span></td>
             </tr>";
             };
