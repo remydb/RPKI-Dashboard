@@ -19,8 +19,8 @@ $varpercent = round($varvalidation / $vartotal * 100, 2);
 <script type="text/javascript">
 google.load('visualization', '1', {packages: ['corechart']});
 <?php
-newpichart('V','I%','U', 'Valid', 'Invalid', 'Unknown', 'Current state of RPKI adoption', 'Chart1');
-newpichart2('IA', 'IP', 'IQ', 'IB', 'V', 'Invalid AS', 'Invalid Prefix (Fixed length mismatch)', 'Invalid Prefix (Range length exceeded)', 'AS & Prefix mismatch', 'Valid', 'Distribution of RPKI prefixes', 'Chart2'); 
+newpichart('V','I%','U', 'Valid', 'Invalid', 'Unknown', 'Distrubion of validation states', 'Chart1');
+newpichart2('IA', 'IP', 'IQ', 'IB', 'V', 'Invalid AS', 'Invalid Prefix (Fixed length mismatch)', 'Invalid Prefix (Range length exceeded)', 'AS & Prefix mismatch', 'Valid', 'Distribution of invalid prefixes', 'Chart2'); 
 ?>
 </script>
 </head>
@@ -57,13 +57,13 @@ newpichart2('IA', 'IP', 'IQ', 'IB', 'V', 'Invalid AS', 'Invalid Prefix (Fixed le
         ============================================= -->
         <section id="total">
           <div class="page-header">
-            	<h1>Distribution of RPKI states</h1>
+            	<h1>Validation states</h1>
 	</div>
         <div class="well">This page provides an overview of the current state of <strong>RPKI adoption</strong>.
 Todays routing table holds <span class="badge badge-success"><?php echo $vartotal;?></span> prefixes. The
 valdation state has been determined for <span class="badge badge-success"><?php echo $varvalidation;?></span>
 <strong>prefixes</strong>. This means that <span class="badge badge-success"><?php echo $varpercent;?>%</span>
-of the prefixes in the routing table are <strong>configured for RPKI.</strong></div>
+of the prefixes in the routing table are <strong>validated</strong>.</div>
 	<div id="Chart1"></div>
         </section>
 
@@ -71,10 +71,10 @@ of the prefixes in the routing table are <strong>configured for RPKI.</strong></
         ============================================= -->
         <section id="invalids">
           <div class="page-header">
-            <h1>Distribution of RPKI enabled prefixes</h1>
+            <h1>Invalid prefixes</h1>
           </div>
           <div class="well">From the <span class="badge badge-success"><?php echo $varvalidation;?></span> prefixes that
-are <strong>configured to use RPKI</strong>, <span class="badge badge-important"><?php echo $varinvalid;?></span>
+are <strong>validated</strong>, <span class="badge badge-important"><?php echo $varinvalid;?></span>
 are <strong>invalid</strong>. The <strong>reason</strong> for these <strong>invalidated prefixes</strong>
 is shown in the <strong>pie chart below.</strong></div>
 	<div id="Chart2"></div>
